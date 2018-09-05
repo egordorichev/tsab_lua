@@ -1,0 +1,3 @@
+/home/egor/tsab/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/egor/tsab/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/egor/tsab/cmake-build-debug/CMakeFiles/tsab.dir
