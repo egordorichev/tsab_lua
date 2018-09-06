@@ -6,6 +6,7 @@
 #include <string>
 #include <cstring>
 #include <map>
+#include <algorithm>
 
 #define MOUSE_1 0
 #define MOUSE_2 1
@@ -66,7 +67,7 @@ static void report_lua_error(lua_State *L) {
 
 Uint8 *input_previous_gamepad_button_state;
 Uint8 *input_current_gamepad_button_state;
-Uint8 *input_gamepad_axis_state;
+Sint16 *input_gamepad_axis_state;
 Uint8 *input_previous_mouse_state;
 Uint8 *input_current_mouse_state;
 Uint8 *input_previous_keyboard_state;
@@ -168,6 +169,45 @@ static void setup_key_map() {
 	input_keyboard_map["mouse_wheel_right"] = MOUSE_WHEEL_RIGHT;
 
 	input_keyboard_map["controller_x"] = SDL_CONTROLLER_BUTTON_X;
+	input_keyboard_map["controller_y"] = SDL_CONTROLLER_BUTTON_Y;
+	input_keyboard_map["controller_a"] = SDL_CONTROLLER_BUTTON_A;
+	input_keyboard_map["controller_b"] = SDL_CONTROLLER_BUTTON_B;
+	input_keyboard_map["controller_back"] = SDL_CONTROLLER_BUTTON_BACK;
+	input_keyboard_map["controller_start"] = SDL_CONTROLLER_BUTTON_START;
+	input_keyboard_map["controller_dpad_up"] = SDL_CONTROLLER_BUTTON_DPAD_UP;
+	input_keyboard_map["controller_dpad_down"] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+	input_keyboard_map["controller_dpad_left"] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+	input_keyboard_map["controller_dpad_right"] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+	input_keyboard_map["controller_lstick_button"] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+	input_keyboard_map["controller_rstick_button"] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+	input_keyboard_map["controller_lshoulder"] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+	input_keyboard_map["controller_rshoulder"] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+
+	input_keyboard_map["lx"] = SDL_CONTROLLER_AXIS_LEFTX;
+	input_keyboard_map["ry"] = SDL_CONTROLLER_AXIS_LEFTY;
+	input_keyboard_map["lx"] = SDL_CONTROLLER_AXIS_RIGHTX;
+	input_keyboard_map["ry"] = SDL_CONTROLLER_AXIS_RIGHTY;
+	input_keyboard_map["ltrigger"] = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
+	input_keyboard_map["rtrigger"] = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
+}
+
+static int tsab_input_get_axis(lua_State *L) {
+	if (controller == nullptr) {
+		lua_pushboolean(L, 0); // No controller
+		return 1;
+	}
+
+	const char *axis = luaL_checkstring(L, 1);
+	auto it = input_keyboard_map.find(axis);
+
+	if (it != input_keyboard_map.end()) {
+		lua_pushnumber(L, std::max<double>(-1, ((double) input_gamepad_axis_state[it->second]) / 32767));
+	} else {
+		std::cout << "No such axis " << axis << std::endl;
+		lua_pushboolean(L, 0); // Axis not found
+	}
+
+	return 1;
 }
 
 static int tsab_input_was_pressed(lua_State *L) {
@@ -175,8 +215,6 @@ static int tsab_input_was_pressed(lua_State *L) {
 
 	if (strstr(key, "controller") != nullptr) {
 		if (controller == nullptr) {
-			std::cout << "No controller!\n";
-
 			lua_pushboolean(L, 0); // No controller
 			return 1;
 		}
@@ -185,7 +223,7 @@ static int tsab_input_was_pressed(lua_State *L) {
 
 		if (it != input_keyboard_map.end()) {
 			int scancode = it->second;
-			
+
 			if (input_current_gamepad_button_state[scancode] == 1 && input_previous_gamepad_button_state[scancode] == 0) {
 				lua_pushboolean(L, 1);
 			} else {
@@ -256,6 +294,7 @@ int main(int, char **) {
 	lua_pushcfunction(L, traceback);
 	lua_register(L, "tsab_quit", tsab_quit);
 	lua_register(L, "tsab_input_was_pressed", tsab_input_was_pressed);
+	lua_register(L, "tsab_input_get_axis", tsab_input_get_axis);
 
 	// Call init
 	lua_getglobal(L, "tsab_init");
@@ -274,7 +313,7 @@ int main(int, char **) {
 
 	input_previous_gamepad_button_state = new Uint8[SDL_CONTROLLER_BUTTON_MAX - SDL_CONTROLLER_BUTTON_INVALID + 1];
 	input_current_gamepad_button_state = new Uint8[SDL_CONTROLLER_BUTTON_MAX - SDL_CONTROLLER_BUTTON_INVALID + 1];
-	input_gamepad_axis_state = new Uint8[SDL_CONTROLLER_AXIS_MAX - SDL_CONTROLLER_AXIS_INVALID + 1];
+	input_gamepad_axis_state = new Sint16[SDL_CONTROLLER_AXIS_MAX - SDL_CONTROLLER_AXIS_INVALID + 1];
 
 	// Timer vars
 	Uint64 timer_now = SDL_GetPerformanceCounter();
@@ -346,7 +385,7 @@ int main(int, char **) {
 			}
 
 			for (int i = SDL_CONTROLLER_AXIS_INVALID; i < SDL_CONTROLLER_AXIS_MAX; i++) {
-				input_gamepad_axis_state[i] = static_cast<Uint8>(SDL_GameControllerGetAxis(controller, (SDL_GameControllerAxis) i));
+				input_gamepad_axis_state[i] = SDL_GameControllerGetAxis(controller, (SDL_GameControllerAxis) i);
 			}
 		}
 
