@@ -496,6 +496,23 @@ static int tsab_graphics_circle(lua_State *L) {
 	return 0;
 }
 
+static int tsab_graphics_ellipse(lua_State *L) {
+	double x = luaL_checknumber(L, 1);
+	double y = luaL_checknumber(L, 2);
+	double w = luaL_checknumber(L, 3);
+	double h = luaL_checknumber(L, 4);
+	double d = check_number(L, 5, 0);
+	bool filled = check_bool(L, 6, true);
+
+	if (filled) {
+		GPU_EllipseFilled(current_target == nullptr ? screen : current_target->target, x, y, w, h, d, current_color);
+	} else {
+		GPU_Ellipse(current_target == nullptr ? screen : current_target->target, x, y, w, h, d, current_color);
+	}
+
+	return 0;
+}
+
 static int tsab_graphics_rectangle(lua_State *L) {
 	double x = luaL_checknumber(L, 1);
 	double y = luaL_checknumber(L, 2);
@@ -507,6 +524,25 @@ static int tsab_graphics_rectangle(lua_State *L) {
 		GPU_RectangleFilled(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
 	} else {
 		GPU_Rectangle(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
+	}
+
+	return 0;
+}
+
+static int tsab_graphics_triangle(lua_State *L) {
+	double x1 = luaL_checknumber(L, 1);
+	double y1 = luaL_checknumber(L, 2);
+	double x2 = luaL_checknumber(L, 3);
+	double y2 = luaL_checknumber(L, 4);
+	double x3 = luaL_checknumber(L, 5);
+	double y3 = luaL_checknumber(L, 6);
+
+	bool filled = check_bool(L, 7, true);
+
+	if (filled) {
+		GPU_TriFilled(current_target == nullptr ? screen : current_target->target, x1, y1, x2, y2, x3, y3, current_color);
+	} else {
+		GPU_Tri(current_target == nullptr ? screen : current_target->target, x1, y1, x2, y2, x3, y3, current_color);
 	}
 
 	return 0;
@@ -589,6 +625,8 @@ int main(int, char **) {
 	lua_register(L, "tsab_graphics_rectangle", tsab_graphics_rectangle);
 	lua_register(L, "tsab_graphics_point", tsab_graphics_point);
 	lua_register(L, "tsab_graphics_line", tsab_graphics_line);
+	lua_register(L, "tsab_graphics_ellipse", tsab_graphics_ellipse);
+	lua_register(L, "tsab_graphics_triangle", tsab_graphics_triangle);
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());

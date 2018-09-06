@@ -57,6 +57,8 @@ tsab.graphics.circle = tsab_graphics_circle
 tsab.graphics.rectangle = tsab_graphics_rectangle
 tsab.graphics.point = tsab_graphics_point
 tsab.graphics.line = tsab_graphics_line
+tsab.graphics.ellipse = tsab_graphics_ellipse
+tsab.graphics.triangle = tsab_graphics_triangle
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then
