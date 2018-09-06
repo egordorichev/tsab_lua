@@ -36,7 +36,12 @@ local tsab_all_canvases = {
 }
 
 tsab.graphics.get_canvas = function() return tsab_active_canvas end
-tsab.graphics.set_canvas = function(canvas) tsab_active_canvas = canvas or tsab_default_canvas end
+
+tsab.graphics.set_canvas = function(canvas)
+	tsab_active_canvas = canvas or tsab_default_canvas
+	tsab_graphics_set_canvas(tsab_active_canvas.pointer)
+end
+
 tsab.graphics.new_canvas = function(w, h)
 	local canvas = tsab_graphics_new_canvas(w, h)
 	local ins = make_canvas(canvas, w, h)
@@ -46,9 +51,10 @@ tsab.graphics.new_canvas = function(w, h)
 	return ins
 end
 
-tsab.graphics.circle = function(x, y, r)
-	tsab_graphics_circle(tsab_active_canvas.pointer, x, y, r)
-end
+tsab.graphics.set_color = tsab_graphics_set_color
+tsab.graphics.get_color = tsab_graphics_get_color
+tsab.graphics.circle = tsab_graphics_circle
+tsab.graphics.rectangle = tsab_graphics_rectangle
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then

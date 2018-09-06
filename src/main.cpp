@@ -393,6 +393,7 @@ static int tsab_input_was_pressed(lua_State *L) {
 }
 
 static GPU_Target *screen;
+GPU_Image *current_target = nullptr;
 
 static int tsab_graphics_get_default_canvas(lua_State *L) {
 	lua_pushlightuserdata(L, screen);
@@ -414,22 +415,16 @@ static int tsab_graphics_new_canvas(lua_State *L) {
 	return 1;
 }
 
-static SDL_Color graphics_current_color = { 255, 255, 255, 255 };
-
-static int tsab_graphics_circle(lua_State *L) {
-	GPU_Image *target = (GPU_Image *) lua_touserdata(L, 1);
-
-	double x = luaL_checknumber(L, 2);
-	double y = luaL_checknumber(L, 3);
-	double r = luaL_checknumber(L, 4);
-
-	GPU_Circle(target->target, x, y, r, graphics_current_color);
+static int tsab_graphics_set_canvas(lua_State *L) {
+	current_target = (GPU_Image *) lua_touserdata(L, 1);
 	return 0;
 }
 
+static SDL_Color current_color = { 255, 255, 255, 255 };
+
 static int tsab_graphics_draw(lua_State *L) {
-	GPU_Target *target = (GPU_Target *) lua_touserdata(L, 1);
-	GPU_Image *what = (GPU_Image *) lua_touserdata(L, 2);
+	auto *target = (GPU_Target *) lua_touserdata(L, 1);
+	auto *what = (GPU_Image *) lua_touserdata(L, 2);
 
 	double x = luaL_checknumber(L, 3);
 	double y = luaL_checknumber(L, 4);
@@ -450,8 +445,8 @@ static int tsab_graphics_draw(lua_State *L) {
 }
 
 static int tsab_graphics_draw_to_texture(lua_State *L) {
-	GPU_Image *target = (GPU_Image *) lua_touserdata(L, 1);
-	GPU_Image *what = (GPU_Image *) lua_touserdata(L, 2);
+	auto *target = (GPU_Image *) lua_touserdata(L, 1);
+	auto *what = (GPU_Image *) lua_touserdata(L, 2);
 
 	double x = luaL_checknumber(L, 3);
 	double y = luaL_checknumber(L, 4);
@@ -469,6 +464,76 @@ static int tsab_graphics_draw_to_texture(lua_State *L) {
 	GPU_BlitTransformX(what, &r, target->target, x, y, ox, oy, a, sx, sy);
 
 	return 0;
+}
+
+static bool check_bool(lua_State *L, int index, bool default_bool) {
+  if (lua_isboolean( L, index)) {
+    return static_cast<bool>(lua_toboolean(L, index));
+  }
+
+  return default_bool;
+}
+
+static double check_number(lua_State *L, int index, double default_number) {
+	if (lua_isnumber(L, index)) {
+		return lua_tonumber(L, index);
+	}
+
+	return default_number;
+}
+
+static int tsab_graphics_circle(lua_State *L) {
+	double x = luaL_checknumber(L, 1);
+	double y = luaL_checknumber(L, 2);
+	double r = luaL_checknumber(L, 3);
+	bool filled = check_bool(L, 4, true);
+
+	if (filled) {
+		GPU_CircleFilled(current_target == nullptr ? screen : current_target->target, x, y, r, current_color);
+	} else {
+		GPU_Circle(current_target == nullptr ? screen : current_target->target, x, y, r, current_color);
+	}
+
+	return 0;
+}
+
+static int tsab_graphics_rectangle(lua_State *L) {
+	double x = luaL_checknumber(L, 1);
+	double y = luaL_checknumber(L, 2);
+	double w = luaL_checknumber(L, 3);
+	double h = luaL_checknumber(L, 4);
+	bool filled = check_bool(L, 5, true);
+
+	if (filled) {
+		GPU_RectangleFilled(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
+	} else {
+		GPU_Rectangle(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
+	}
+
+	return 0;
+}
+
+static int tsab_graphics_set_color(lua_State *L) {
+	double r = check_number(L, 1, 1);
+	double g = check_number(L, 2, 1);
+	double b = check_number(L, 3, 1);
+	double a = check_number(L, 4, 1);
+
+	current_color.r = std::clamp<int>(std::round(r * 255), 0, 255);
+	current_color.g = std::clamp<int>(std::round(g * 255), 0, 255);
+	current_color.b = std::clamp<int>(std::round(b * 255), 0, 255);
+	current_color.a = std::clamp<int>(std::round(a * 255), 0, 255);
+
+	return 0;
+}
+
+static int tsab_graphics_get_color(lua_State *L) {
+	lua_pushnumber(L, ((double) current_color.r) / 255);
+	lua_pushnumber(L, ((double) current_color.g) / 255);
+	lua_pushnumber(L, ((double) current_color.b) / 255);
+	lua_pushnumber(L, ((double) current_color.a) / 255);
+
+	return 4;
 }
 
 int main(int, char **) {
@@ -492,9 +557,13 @@ int main(int, char **) {
 	// Graphics API
 	lua_register(L, "tsab_graphics_get_default_canvas", tsab_graphics_get_default_canvas);
 	lua_register(L, "tsab_graphics_new_canvas", tsab_graphics_new_canvas);
-	lua_register(L, "tsab_graphics_circle", tsab_graphics_circle);
+	lua_register(L, "tsab_graphics_set_canvas", tsab_graphics_set_canvas);
+	lua_register(L, "tsab_graphics_set_color", tsab_graphics_set_color);
+	lua_register(L, "tsab_graphics_get_color", tsab_graphics_get_color);
 	lua_register(L, "tsab_graphics_draw", tsab_graphics_draw);
 	lua_register(L, "tsab_graphics_draw_to_texture", tsab_graphics_draw_to_texture);
+	lua_register(L, "tsab_graphics_circle", tsab_graphics_circle);
+	lua_register(L, "tsab_graphics_rectangle", tsab_graphics_rectangle);
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
