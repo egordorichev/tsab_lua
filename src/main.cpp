@@ -513,6 +513,26 @@ static int tsab_graphics_rectangle(lua_State *L) {
 	return 0;
 }
 
+static int tsab_graphics_point(lua_State *L) {
+	double x = luaL_checknumber(L, 1);
+	double y = luaL_checknumber(L, 2);
+
+	GPU_Pixel(current_target == nullptr ? screen : current_target->target, x + 0.5, y + 0.5, current_color);
+
+	return 0;
+}
+
+static int tsab_graphics_line(lua_State *L) {
+	double x1 = luaL_checknumber(L, 1);
+	double y1 = luaL_checknumber(L, 2);
+	double x2 = luaL_checknumber(L, 1);
+	double y2 = luaL_checknumber(L, 2);
+
+	GPU_Pixel(current_target == nullptr ? screen : current_target->target, x + 0.5, y + 0.5, current_color);
+
+	return 0;
+}
+
 static int tsab_graphics_set_color(lua_State *L) {
 	double r = check_number(L, 1, 1);
 	double g = check_number(L, 2, 1);
@@ -564,6 +584,7 @@ int main(int, char **) {
 	lua_register(L, "tsab_graphics_draw_to_texture", tsab_graphics_draw_to_texture);
 	lua_register(L, "tsab_graphics_circle", tsab_graphics_circle);
 	lua_register(L, "tsab_graphics_rectangle", tsab_graphics_rectangle);
+	lua_register(L, "tsab_graphics_point", tsab_graphics_point);
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
