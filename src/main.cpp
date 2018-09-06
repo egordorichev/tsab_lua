@@ -7,6 +7,16 @@
 #include <cstring>
 #include <map>
 
+#define MOUSE_1 0
+#define MOUSE_2 1
+#define MOUSE_3 2
+#define MOUSE_4 3
+#define MOUSE_5 4
+#define MOUSE_WHEEL_UP 5
+#define MOUSE_WHEEL_DOWN 6
+#define MOUSE_WHEEL_LEFT 7
+#define MOUSE_WHEEL_RIGHT 8
+
 static bool running = true;
 
 /*
@@ -54,6 +64,8 @@ static void report_lua_error(lua_State *L) {
 	lua_pcall(L, 1, 0, 0);
 }
 
+Uint8 *input_previous_mouse_state;
+Uint8 *input_current_mouse_state;
 Uint8 *input_previous_keyboard_state;
 const Uint8 *input_current_keyboard_state;
 
@@ -65,7 +77,7 @@ struct compare
 		}
 };
 
-static std::map<const char *, SDL_Scancode, compare> input_keyboard_map;
+static std::map<const char *, int, compare> input_keyboard_map;
 
 static void setup_key_map() {
 	input_keyboard_map["a"] = SDL_SCANCODE_A;
@@ -140,24 +152,51 @@ static void setup_key_map() {
 	input_keyboard_map["up"] = SDL_SCANCODE_UP;
 	input_keyboard_map["down"] = SDL_SCANCODE_DOWN;
 	input_keyboard_map["comma"] = SDL_SCANCODE_COMMA;
+
+	input_keyboard_map["mouse1"] = MOUSE_1;
+	input_keyboard_map["mouse2"] = MOUSE_2;
+	input_keyboard_map["mouse3"] = MOUSE_3;
+	input_keyboard_map["mouse4"] = MOUSE_4;
+	input_keyboard_map["mouse5"] = MOUSE_5;
+	input_keyboard_map["mouse_wheel_up"] = MOUSE_WHEEL_UP;
+	input_keyboard_map["mouse_wheel_down"] = MOUSE_WHEEL_DOWN;
+	input_keyboard_map["mouse_wheel_left"] = MOUSE_WHEEL_LEFT;
+	input_keyboard_map["mouse_wheel_right"] = MOUSE_WHEEL_RIGHT;
 }
 
 static int tsab_input_was_pressed(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
-	auto it = input_keyboard_map.find(key);
+	if (strstr(key, "mouse") != nullptr) {
+		auto it = input_keyboard_map.find(key);
 
-	if (it != input_keyboard_map.end()) {
-		SDL_Scancode scancode = it->second;
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
 
-		if (input_current_keyboard_state[scancode] == 1 && input_previous_keyboard_state[scancode] == 0) {
-			lua_pushboolean(L, 1);
+			if (input_current_mouse_state[scancode] == 1 && input_previous_mouse_state[scancode] == 0) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
 		} else {
-			lua_pushboolean(L, 0);
+			std::cout << "No such mouse control " << key << std::endl;
+			lua_pushboolean(L, 0); // Control not found
 		}
 	} else {
-		std::cout << "No such key " << key << std::endl;
-		lua_pushboolean(L, 0); // Key not found
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_keyboard_state[scancode] == 1 && input_previous_keyboard_state[scancode] == 0) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such key " << key << std::endl;
+			lua_pushboolean(L, 0); // Key not found
+		}
 	}
 
 	return 1;
@@ -200,6 +239,9 @@ int main(int, char **) {
 	input_previous_keyboard_state = new Uint8[512];
 	input_current_keyboard_state = SDL_GetKeyboardState(nullptr);
 
+	input_previous_mouse_state = new Uint8[12];
+	input_current_mouse_state = new Uint8[12];
+
 	// Timer vars
 	Uint64 timer_now = SDL_GetPerformanceCounter();
 	Uint64 timer_last = 0;
@@ -216,9 +258,28 @@ int main(int, char **) {
 			input_previous_keyboard_state[i] = input_current_keyboard_state[i];
 		}
 
+		for (int i = 0; i < 12; i++) {
+			input_previous_mouse_state[i] = input_current_mouse_state[i];
+			input_current_mouse_state[i] = 0;
+		}
+
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT: running = false; break;
+				case SDL_MOUSEBUTTONDOWN:
+					if (event.button.button == SDL_BUTTON_LEFT) input_current_mouse_state[MOUSE_1] = 1;
+					if (event.button.button == SDL_BUTTON_RIGHT) input_current_mouse_state[MOUSE_2] = 1;
+					if (event.button.button == SDL_BUTTON_MIDDLE) input_current_mouse_state[MOUSE_3] = 1;
+					if (event.button.button == SDL_BUTTON_X1) input_current_mouse_state[MOUSE_4] = 1;
+					if (event.button.button == SDL_BUTTON_X2) input_current_mouse_state[MOUSE_5] = 1;
+				break;
+				case SDL_MOUSEWHEEL:
+					if (event.wheel.x == 1) input_current_mouse_state[MOUSE_WHEEL_RIGHT] = 1;
+					if (event.wheel.x == -1) input_current_mouse_state[MOUSE_WHEEL_LEFT] = 1;
+					if (event.wheel.y == 1) input_current_mouse_state[MOUSE_WHEEL_DOWN] = 1;
+					if (event.wheel.y == -1) input_current_mouse_state[MOUSE_WHEEL_UP] = 1;
+				break;
+				default: break;
 			}
 		}
 
@@ -258,6 +319,8 @@ int main(int, char **) {
 		timer_dt = ((timer_now - timer_last) / (double) SDL_GetPerformanceFrequency());
 	}
 
+	delete input_previous_mouse_state;
+	delete input_current_mouse_state;
 	delete input_previous_keyboard_state;
 
 	GPU_Quit();
