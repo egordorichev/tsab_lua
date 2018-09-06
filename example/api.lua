@@ -67,7 +67,6 @@ tsab.graphics.new_canvas = function(w, h)
 end
 
 local active_shader
-
 tsab.graphics.color = function(r, g, b, a)
 	tsab_graphics_set_color(r, g, b, a)
 
@@ -83,6 +82,7 @@ tsab.graphics.point = tsab_graphics_point
 tsab.graphics.line = tsab_graphics_line
 tsab.graphics.ellipse = tsab_graphics_ellipse
 tsab.graphics.triangle = tsab_graphics_triangle
+tsab.graphics.camera = tsab_graphics_camera
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then
@@ -126,6 +126,8 @@ local default_shader = 	tsab.shaders.new("default.frag")
 tsab.shaders.set(default_shader)
 tsab.graphics.color()
 tsab.shaders.set()
+tsab.shaders.send_vec4 = tsab_shaders_send_vec4
+tsab.shaders.send_float = tsab_shaders_send_float
 
 tsab.shaders.get_default = function() return default_shader end
 

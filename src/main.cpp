@@ -642,6 +642,35 @@ static int tsab_graphics_get_color(lua_State *L) {
 	return 4;
 }
 
+static bool pushed;
+
+static int tsab_graphics_camera(lua_State *L) {
+	double x = check_number(L, 1, 0);
+	double y = check_number(L, 2, 0);
+	double s = check_number(L, 3, 1);
+
+	GPU_MatrixMode(GPU_MODELVIEW);
+
+	if (pushed) {
+		GPU_PopMatrix();
+	}
+
+	if (lua_isnil(L, 1)) {
+		pushed = false;
+		return 0;
+	}
+
+	if (current_target == nullptr) {
+		y *= -1;
+	}
+
+	pushed = true;
+	GPU_PushMatrix();
+	GPU_Translate(x / (current_target == nullptr ? screen->w / 2 : current_target->w / 2), y / (current_target == nullptr ? screen->h / 2 : current_target->h / 2), 0.0f);
+	GPU_Scale(s, s, 1.0f);
+	return 0;
+}
+
 /*
  * Shaders
  */
@@ -762,6 +791,7 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_line", tsab_graphics_line);
 	lua_register(L, "tsab_graphics_ellipse", tsab_graphics_ellipse);
 	lua_register(L, "tsab_graphics_triangle", tsab_graphics_triangle);
+	lua_register(L, "tsab_graphics_camera", tsab_graphics_camera);
 	// Shaders API
 	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
 	lua_register(L, "tsab_shaders_set", tsab_shaders_set);
