@@ -54,28 +54,41 @@ static void report_lua_error(lua_State *L) {
 	lua_pcall(L, 1, 0, 0);
 }
 
-const Uint8 *input_previous_keyboard_state;
+Uint8 *input_previous_keyboard_state;
 const Uint8 *input_current_keyboard_state;
-static std::map<std::string, SDL_Keycode> input_keyboard_map;
+
+// Compares two strings in a map
+struct compare
+{
+		bool operator() (char const *a, char const *b) {
+			return std::strcmp(a, b) < 0;
+		}
+};
+
+static std::map<const char *, SDL_Scancode, compare> input_keyboard_map;
 
 static int tsab_input_was_pressed(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
-	SDL_Keycode keycode = input_keyboard_map[key];
 
-	if (keycode) {
-		SDL_Scancode scancode = SDL_GetScancodeFromKey(keycode);
+	auto it = input_keyboard_map.find(key);
 
-		if (input_current_keyboard_state[scancode] && !input_previous_keyboard_state[scancode]) {
+	if (it != input_keyboard_map.end()) {
+		SDL_Scancode scancode = it->second;
+
+		if (input_current_keyboard_state[scancode] == 1 && input_previous_keyboard_state[scancode] == 0) {
 			lua_pushboolean(L, 1);
 		} else {
 			lua_pushboolean(L, 0);
 		}
+	} else {
+		std::cout << "No such key " << key << std::endl;
+		lua_pushboolean(L, 0); // Key not found
 	}
 
 	return 1;
 }
 
-int main(int, char **){
+int main(int, char **) {
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -109,7 +122,7 @@ int main(int, char **){
 
 	// Event / input vars
 	SDL_Event event;
-	input_previous_keyboard_state = SDL_GetKeyboardState(nullptr);
+	input_previous_keyboard_state = new Uint8[512];
 	input_current_keyboard_state = SDL_GetKeyboardState(nullptr);
 
 	// Timer vars
@@ -121,7 +134,12 @@ int main(int, char **){
 
 	while (running) {
 		// Handle input
-		memcpy(&input_previous_keyboard_state, input_current_keyboard_state, 512);
+		// memcpy(&input_previous_keyboard_state, input_current_keyboard_state, 512);
+
+		// Fixme, use memcpy
+		for (int i = 0; i < 512; i++) {
+			input_previous_keyboard_state[i] = input_current_keyboard_state[i];
+		}
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
@@ -164,6 +182,8 @@ int main(int, char **){
 		timer_now = SDL_GetPerformanceCounter();
 		timer_dt = ((timer_now - timer_last) / (double) SDL_GetPerformanceFrequency());
 	}
+
+	delete input_previous_keyboard_state;
 
 	GPU_Quit();
 

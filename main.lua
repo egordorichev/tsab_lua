@@ -21,7 +21,7 @@ end
 
 function tsab_update(dt)
 	if tsab_input_was_pressed("q") then
-		tsab_exit()
+		tsab_quit()
 		return
 	end
 
