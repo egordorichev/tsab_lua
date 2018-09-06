@@ -1,13 +1,13 @@
-attribute vec3 v_Vertex;
-attribute vec2 v_TexCoord;
-attribute vec4 v_Color;
-uniform mat4 v_ProjectionMatrix;
+attribute vec3 gpu_Vertex;
+attribute vec2 gpu_TexCoord;
+attribute vec4 gpu_Color;
+uniform mat4 gpu_ModelViewProjectionMatrix;
 
 varying vec4 color;
 varying vec2 texCoord;
 
-void main(void) {
-    color = v_Color;
-    texCoord = vec2(v_TexCoord);
-    gl_Position = v_ProjectionMatrix * vec4(v_Vertex, 1.0);
+void main() {
+	color = gpu_Color;
+	texCoord = vec2(gpu_TexCoord);
+	gl_Position = gpu_ModelViewProjectionMatrix * vec4(gpu_Vertex, 1.0);
 }

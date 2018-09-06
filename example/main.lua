@@ -3,19 +3,17 @@
 --
 
 local canvas
-local shader
 
-function tsab_init()
+function tsab.init()
 	print("hi!")
 	canvas = tsab.graphics.new_canvas(640 / 2, 480 / 2)
-	shader = tsab.shaders.new("default.frag")
 end
 
-function tsab_destroy()
+function tsab.destroy()
 	print("bye!")
 end
 
-function tsab_error(message)
+function tsab.error(message)
 	print("tsab_error: " .. message)
 	tsab.quit()
 end
@@ -24,26 +22,10 @@ end
 -- Main game loop
 --
 
-function tsab_update(dt)
-	if tsab.input.was_pressed("escape") then
-		tsab.quit()
-		return
-	end
+function tsab.update(dt)
+
 end
 
-function tsab_draw()
-	tsab.graphics.set_canvas(canvas)
-
-	tsab.graphics.color(1, 0, 0.3, 1)
-	tsab.graphics.rectangle(32, 32, 64, 32)
-	tsab.graphics.color(0, 1, 0, 1)
-	tsab.graphics.circle(64, 64, 16)
-	tsab.graphics.line(1, 1, 32, 64)
-	tsab.graphics.ellipse(96, 96, 8, 16)
-	tsab.graphics.color()
-	tsab.graphics.triangle(100, 100, 132, 100, 110, 132)
-	tsab.graphics.point(1, 1)
-
-	tsab.graphics.set_canvas(nil)
+function tsab.draw()
 	tsab.graphics.draw(canvas, 0, 0, 0, 0, 0, 2, 2)
 end

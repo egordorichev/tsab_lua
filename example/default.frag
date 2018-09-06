@@ -1,8 +1,13 @@
-varying vec2 v_texCoord;
+varying vec2 texCoord;
 
 uniform sampler2D tex;
 uniform vec4 color;
+uniform float textured;
 
-void main(void) {
-    gl_FragColor = texture2D(tex, v_texCoord) * color;
+void main() {
+    if (textured > 0.5) {
+        gl_FragColor = texture2D(tex, texCoord) * color;
+    } else {
+        gl_FragColor = color;
+    }
 }

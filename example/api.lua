@@ -1,5 +1,23 @@
 tsab = {}
 tsab.quit = tsab_quit
+tsab.update = function() end
+tsab.draw = function() end
+tsab.init = function() end
+tsab.destroy = function() end
+tsab.error = function() end
+
+tsab_init = function() tsab.init() end
+tsab_update = function() tsab.update() end
+tsab_destroy = function() tsab.destroy() end
+tsab_error = function() tsab.error() end
+
+local default_shader
+
+function tsab_draw()
+	tsab.shaders.set(default_shader)
+	tsab.draw()
+	tsab.shaders.set(nil)
+end
 
 --
 -- input
@@ -39,7 +57,12 @@ tsab.graphics.get_canvas = function() return tsab_active_canvas end
 
 tsab.graphics.set_canvas = function(canvas)
 	tsab_active_canvas = canvas or tsab_default_canvas
-	tsab_graphics_set_canvas(tsab_active_canvas.pointer)
+
+	if canvas then
+		tsab_graphics_set_canvas(canvas.pointer)
+	else
+		tsab_graphics_set_canvas(nil)
+	end
 end
 
 tsab.graphics.new_canvas = function(w, h)
@@ -51,7 +74,16 @@ tsab.graphics.new_canvas = function(w, h)
 	return ins
 end
 
-tsab.graphics.color = tsab_graphics_set_color
+local active_shader
+
+tsab.graphics.color = function(r, g, b, a)
+	tsab_graphics_set_color(r, g, b, a)
+
+	if active_shader then
+		tsab_shaders_send_vec4(active_shader, "color", r or 1, g or 1, b or 1, a or 1)
+	end
+end
+
 tsab.graphics.get_color = tsab_graphics_get_color
 tsab.graphics.circle = tsab_graphics_circle
 tsab.graphics.rectangle = tsab_graphics_rectangle
@@ -92,3 +124,15 @@ end
 
 tsab.shaders = {}
 tsab.shaders.new = tsab_shaders_new
+
+tsab.shaders.set = function(v)
+	active_shader = v
+	tsab_shaders_set(v)
+end
+
+default_shader = 	tsab.shaders.new("default.frag")
+tsab.shaders.set(default_shader)
+tsab.graphics.color()
+tsab.shaders.set()
+
+tsab.shaders.get_default = function() return default_shader end

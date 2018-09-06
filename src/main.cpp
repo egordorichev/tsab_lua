@@ -7,6 +7,17 @@
 #include <cstring>
 #include <map>
 #include <vector>
+#include <sstream>
+
+#ifdef _WIN32
+#include <direct.h>
+#define cwd _getcwd
+#define cd _chdir
+#else
+#include "unistd.h"
+#define cwd getcwd
+#define cd chdir
+#endif
 
 #define MOUSE_1 0
 #define MOUSE_2 1
@@ -28,6 +39,8 @@ static std::string working_dir = "./";
 static int window_width = 640;
 static int window_height = 480;
 static bool resizeable = true;
+static std::vector<GPU_ShaderBlock> shader_blocks;
+static std::vector<Uint32> shaders;
 
 static Uint32 pack_window_flags() {
 	return 0;
@@ -421,56 +434,12 @@ static int tsab_graphics_set_canvas(lua_State *L) {
 
 static SDL_Color current_color = { 255, 255, 255, 255 };
 
-static int tsab_graphics_draw(lua_State *L) {
-	auto *target = (GPU_Target *) lua_touserdata(L, 1);
-	auto *what = (GPU_Image *) lua_touserdata(L, 2);
-
-	double x = luaL_checknumber(L, 3);
-	double y = luaL_checknumber(L, 4);
-	double a = luaL_checknumber(L, 5);
-	double ox = luaL_checknumber(L, 6);
-	double oy = luaL_checknumber(L, 7);
-	double sx = luaL_checknumber(L, 8);
-	double sy = luaL_checknumber(L, 9);
-	double src_x = luaL_checknumber(L, 10);
-	double src_y = luaL_checknumber(L, 11);
-	double src_w = luaL_checknumber(L, 12);
-	double src_h = luaL_checknumber(L, 13);
-
-	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
-	GPU_BlitTransformX(what, &r, target, x, y, ox, oy, a, sx, sy);
-
-	return 0;
-}
-
-static int tsab_graphics_draw_to_texture(lua_State *L) {
-	auto *target = (GPU_Image *) lua_touserdata(L, 1);
-	auto *what = (GPU_Image *) lua_touserdata(L, 2);
-
-	double x = luaL_checknumber(L, 3);
-	double y = luaL_checknumber(L, 4);
-	double a = luaL_checknumber(L, 5);
-	double ox = luaL_checknumber(L, 6);
-	double oy = luaL_checknumber(L, 7);
-	double sx = luaL_checknumber(L, 8);
-	double sy = luaL_checknumber(L, 9);
-	double src_x = luaL_checknumber(L, 10);
-	double src_y = luaL_checknumber(L, 11);
-	double src_w = luaL_checknumber(L, 12);
-	double src_h = luaL_checknumber(L, 13);
-
-	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
-	GPU_BlitTransformX(what, &r, target->target, x, y, ox, oy, a, sx, sy);
-
-	return 0;
-}
-
 static bool check_bool(lua_State *L, int index, bool default_bool) {
-  if (lua_isboolean( L, index)) {
-    return static_cast<bool>(lua_toboolean(L, index));
-  }
+	if (lua_isboolean( L, index)) {
+		return static_cast<bool>(lua_toboolean(L, index));
+	}
 
-  return default_bool;
+	return default_bool;
 }
 
 static double check_number(lua_State *L, int index, double default_number) {
@@ -481,7 +450,66 @@ static double check_number(lua_State *L, int index, double default_number) {
 	return default_number;
 }
 
+static int active_shader;
+
+static int tsab_graphics_draw(lua_State *L) {
+	if (active_shader > 0) {
+		std::cout << GPU_GetUniformLocation(shaders[active_shader], "textured") << " set\n";
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
+	}
+
+	auto *target = (GPU_Target *) lua_touserdata(L, 1);
+	auto *what = (GPU_Image *) lua_touserdata(L, 2);
+
+	double x = luaL_checknumber(L, 3);
+	double y = luaL_checknumber(L, 4);
+	double a = check_number(L, 5, 0);
+	double ox = check_number(L, 6, 0);
+	double oy = check_number(L, 7, 0);
+	double sx = check_number(L, 8, 1);
+	double sy = check_number(L, 9, 1);
+	double src_x = check_number(L, 10, 0);
+	double src_y = check_number(L, 11, 0);
+	double src_w = check_number(L, 12, what->w);
+	double src_h = check_number(L, 13, what->h);
+
+	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
+	GPU_BlitTransformX(what, &r, target, x, y, ox, oy, a, sx, sy);
+
+	return 0;
+}
+
+static int tsab_graphics_draw_to_texture(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
+	}
+
+	auto *target = (GPU_Image *) lua_touserdata(L, 1);
+	auto *what = (GPU_Image *) lua_touserdata(L, 2);
+
+	double x = luaL_checknumber(L, 3);
+	double y = luaL_checknumber(L, 4);
+	double a = check_number(L, 5, 0);
+	double ox = check_number(L, 6, 0);
+	double oy = check_number(L, 7, 0);
+	double sx = check_number(L, 8, 1);
+	double sy = check_number(L, 9, 1);
+	double src_x = check_number(L, 10, 0);
+	double src_y = check_number(L, 11, 0);
+	double src_w = check_number(L, 12, what->w);
+	double src_h = check_number(L, 13, what->h);
+
+	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
+	GPU_BlitTransformX(what, &r, target->target, x, y, ox, oy, a, sx, sy);
+
+	return 0;
+}
+
 static int tsab_graphics_circle(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
 	double x = luaL_checknumber(L, 1);
 	double y = luaL_checknumber(L, 2);
 	double r = luaL_checknumber(L, 3);
@@ -497,6 +525,10 @@ static int tsab_graphics_circle(lua_State *L) {
 }
 
 static int tsab_graphics_ellipse(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
 	double x = luaL_checknumber(L, 1);
 	double y = luaL_checknumber(L, 2);
 	double w = luaL_checknumber(L, 3);
@@ -514,6 +546,10 @@ static int tsab_graphics_ellipse(lua_State *L) {
 }
 
 static int tsab_graphics_rectangle(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
 	double x = luaL_checknumber(L, 1);
 	double y = luaL_checknumber(L, 2);
 	double w = luaL_checknumber(L, 3);
@@ -530,6 +566,10 @@ static int tsab_graphics_rectangle(lua_State *L) {
 }
 
 static int tsab_graphics_triangle(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
 	double x1 = luaL_checknumber(L, 1);
 	double y1 = luaL_checknumber(L, 2);
 	double x2 = luaL_checknumber(L, 3);
@@ -549,6 +589,10 @@ static int tsab_graphics_triangle(lua_State *L) {
 }
 
 static int tsab_graphics_point(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
 	double x = luaL_checknumber(L, 1);
 	double y = luaL_checknumber(L, 2);
 
@@ -558,6 +602,10 @@ static int tsab_graphics_point(lua_State *L) {
 }
 
 static int tsab_graphics_line(lua_State *L) {
+	if (active_shader > 0) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
 	double x1 = luaL_checknumber(L, 1);
 	double y1 = luaL_checknumber(L, 2);
 	double x2 = luaL_checknumber(L, 3);
@@ -599,48 +647,94 @@ static int tsab_graphics_get_color(lua_State *L) {
  * Shaders
  */
 
-static std::vector<GPU_ShaderBlock> shader_blocks;
-static std::vector<Uint32> shaders;
+static std::vector<Uint32> shaders_separate;
 
 static int tsab_shaders_new(lua_State *L) {
-	std::cout << "str: `" << luaL_checkstring(L, 1) << "`" << std::endl;
-	const char *filename = (working_dir + std::string(luaL_checkstring(L, 1))).c_str();
-
-	std::cout << "filename: " << filename << std::endl;
-
-	Uint32 v = GPU_LoadShader(GPU_VERTEX_SHADER, (working_dir + "/default.vert").c_str());
+	Uint32 v = GPU_LoadShader(GPU_VERTEX_SHADER, "default.vert");
 
 	if (!v) {
 		GPU_LogError("Failed to load vertex shader: %s\n", GPU_GetShaderMessage());
 	}
 
-	Uint32 f = GPU_LoadShader(GPU_FRAGMENT_SHADER, filename);
+	shaders_separate.push_back(v);
+	Uint32 f = GPU_LoadShader(GPU_FRAGMENT_SHADER, luaL_checkstring(L, 1));
 
 	if (!f) {
 		GPU_LogError("Failed to load fragment shader: %s\n", GPU_GetShaderMessage());
 	}
 
+	shaders_separate.push_back(f);
 	Uint32 p = GPU_LinkShaders(v, f);
 
 	if (!p) {
 		GPU_LogError("Failed to link shader program: %s\n", GPU_GetShaderMessage());
 	}
 
-	shader_blocks.push_back(GPU_LoadShaderBlock(p, "v_Vertex", "v_TexCoord", "v_Color", "v_ProjectionMatrix"));
+	shader_blocks.push_back(GPU_LoadShaderBlock(p, "gpu_Vertex", "gpu_TexCoord", "gpu_Color", "gpu_ModelViewProjectionMatrix"));
 	shaders.push_back(p);
 	lua_pushnumber(L, shaders.size() - 1);
 
 	return 1;
 }
 
+static int tsab_shaders_set(lua_State *L) {
+	if (lua_isnil(L, 1)) {
+		active_shader = 0;
+		GPU_ActivateShaderProgram(0, nullptr);
+		return 0;
+	}
+
+	Uint32 p = luaL_checknumber(L, 1);
+
+	if (shaders.size() <= p) {
+		return 0;
+	}
+
+	active_shader = p;
+
+	GPU_ActivateShaderProgram(shaders[p], &shader_blocks[p]);
+
+	return 0;
+}
+
+static int tsab_shaders_send_float(lua_State *L) {
+	Uint32 p = luaL_checknumber(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	double value = luaL_checknumber(L, 3);
+	GPU_SetUniformf(GPU_GetUniformLocation(shaders[p], name), value);
+
+	return 0;
+}
+
+static int tsab_shaders_send_vec4(lua_State *L) {
+	Uint32 p = luaL_checknumber(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	float r = luaL_checknumber(L, 3);
+	float g = luaL_checknumber(L, 4);
+	float b = luaL_checknumber(L, 5);
+	float a = luaL_checknumber(L, 6);
+
+	float values[] = { r, g, b, a };
+	GPU_SetUniformfv(GPU_GetUniformLocation(shaders[p], name), 4, 1, (float *) values);
+
+	return 0;
+}
+
 int main(int arg, char **argv) {
 	if (arg >= 2) {
-		working_dir = argv[1];
+		working_dir = std::string(argv[1]);
+
+		if (working_dir[working_dir.length() - 1] != '/') {
+			working_dir += "/";
+		}
+
+		chdir(working_dir.c_str());
 	}
 
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
+	GPU_SetRequiredFeatures(GPU_FEATURE_BASIC_SHADERS);
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_GameControllerAddMappingsFromFile((working_dir + "/gamecontrollerdb.txt").c_str());
+	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
@@ -671,21 +765,24 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_triangle", tsab_graphics_triangle);
 	// Shaders API
 	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
+	lua_register(L, "tsab_shaders_set", tsab_shaders_set);
+	lua_register(L, "tsab_shaders_send_float", tsab_shaders_send_float);
+	lua_register(L, "tsab_shaders_send_vec4", tsab_shaders_send_vec4);
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
 	GPU_Clear(screen);
 
 	// Do the api file
-	int rv = luaL_dofile(L, (working_dir + "/api.lua").c_str());
+	int rv = luaL_dofile(L, "api.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
 		return rv;
 	}
 
-	// Do the main files
-	rv = luaL_loadfile(L, (working_dir + "/main.lua").c_str());
+	// Do the main file
+	rv = luaL_loadfile(L, "main.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
@@ -823,6 +920,14 @@ int main(int arg, char **argv) {
 		timer_last = timer_now;
 		timer_now = SDL_GetPerformanceCounter();
 		timer_dt = ((timer_now - timer_last) / (double) SDL_GetPerformanceFrequency());
+	}
+
+	for (int i = 0; i < shaders_separate.size(); i++) {
+		GPU_FreeShader(shaders_separate[i]);
+	}
+
+	for (int i = 0; i < shaders.size(); i++) {
+		GPU_FreeShaderProgram(shaders[i]);
 	}
 
 	delete input_previous_mouse_state;
