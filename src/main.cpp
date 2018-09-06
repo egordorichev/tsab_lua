@@ -64,10 +64,14 @@ static void report_lua_error(lua_State *L) {
 	lua_pcall(L, 1, 0, 0);
 }
 
+Uint8 *input_previous_gamepad_button_state;
+Uint8 *input_current_gamepad_button_state;
+Uint8 *input_gamepad_axis_state;
 Uint8 *input_previous_mouse_state;
 Uint8 *input_current_mouse_state;
 Uint8 *input_previous_keyboard_state;
 const Uint8 *input_current_keyboard_state;
+SDL_GameController *controller = nullptr;
 
 // Compares two strings in a map
 struct compare
@@ -162,12 +166,36 @@ static void setup_key_map() {
 	input_keyboard_map["mouse_wheel_down"] = MOUSE_WHEEL_DOWN;
 	input_keyboard_map["mouse_wheel_left"] = MOUSE_WHEEL_LEFT;
 	input_keyboard_map["mouse_wheel_right"] = MOUSE_WHEEL_RIGHT;
+
+	input_keyboard_map["controller_x"] = SDL_CONTROLLER_BUTTON_X;
 }
 
 static int tsab_input_was_pressed(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
-	if (strstr(key, "mouse") != nullptr) {
+	if (strstr(key, "controller") != nullptr) {
+		if (controller == nullptr) {
+			std::cout << "No controller!\n";
+
+			lua_pushboolean(L, 0); // No controller
+			return 1;
+		}
+
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+			
+			if (input_current_gamepad_button_state[scancode] == 1 && input_previous_gamepad_button_state[scancode] == 0) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such control " << key << std::endl;
+			lua_pushboolean(L, 0); // Control not found
+		}
+	} else if (strstr(key, "mouse") != nullptr) {
 		auto it = input_keyboard_map.find(key);
 
 		if (it != input_keyboard_map.end()) {
@@ -205,6 +233,7 @@ static int tsab_input_was_pressed(lua_State *L) {
 int main(int, char **) {
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	SDL_Init(SDL_INIT_EVERYTHING);
+	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
@@ -220,6 +249,7 @@ int main(int, char **) {
 	// Init key map
 	setup_key_map();
 
+	// Create window
 	GPU_Target *screen = GPU_Init(window_width, window_height, pack_window_flags());
 
 	// Register API
@@ -242,6 +272,10 @@ int main(int, char **) {
 	input_previous_mouse_state = new Uint8[12];
 	input_current_mouse_state = new Uint8[12];
 
+	input_previous_gamepad_button_state = new Uint8[SDL_CONTROLLER_BUTTON_MAX - SDL_CONTROLLER_BUTTON_INVALID + 1];
+	input_current_gamepad_button_state = new Uint8[SDL_CONTROLLER_BUTTON_MAX - SDL_CONTROLLER_BUTTON_INVALID + 1];
+	input_gamepad_axis_state = new Uint8[SDL_CONTROLLER_AXIS_MAX - SDL_CONTROLLER_AXIS_INVALID + 1];
+
 	// Timer vars
 	Uint64 timer_now = SDL_GetPerformanceCounter();
 	Uint64 timer_last = 0;
@@ -263,6 +297,10 @@ int main(int, char **) {
 			input_current_mouse_state[i] = 0;
 		}
 
+		for (int i = 0; i < 24; i++) {
+			input_previous_gamepad_button_state[i] = input_current_gamepad_button_state[i];
+		}
+
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT: running = false; break;
@@ -272,14 +310,43 @@ int main(int, char **) {
 					if (event.button.button == SDL_BUTTON_MIDDLE) input_current_mouse_state[MOUSE_3] = 1;
 					if (event.button.button == SDL_BUTTON_X1) input_current_mouse_state[MOUSE_4] = 1;
 					if (event.button.button == SDL_BUTTON_X2) input_current_mouse_state[MOUSE_5] = 1;
-				break;
+					break;
 				case SDL_MOUSEWHEEL:
 					if (event.wheel.x == 1) input_current_mouse_state[MOUSE_WHEEL_RIGHT] = 1;
 					if (event.wheel.x == -1) input_current_mouse_state[MOUSE_WHEEL_LEFT] = 1;
 					if (event.wheel.y == 1) input_current_mouse_state[MOUSE_WHEEL_DOWN] = 1;
 					if (event.wheel.y == -1) input_current_mouse_state[MOUSE_WHEEL_UP] = 1;
-				break;
+					break;
+				case SDL_JOYDEVICEADDED:
+				case SDL_CONTROLLERDEVICEADDED:
+					if (controller == nullptr) {
+						controller = SDL_GameControllerOpen(event.cdevice.which);
+
+						if (controller == nullptr) {
+							std::cerr << "Failed to connect controller: " << SDL_GetError() << "\n";
+						} else {
+							std::cout << "Registered controller\n";
+						}
+					}
+					break;
+				case SDL_JOYDEVICEREMOVED:
+				case SDL_CONTROLLERDEVICEREMOVED:
+					if (controller == reinterpret_cast<SDL_GameController *>(event.cdevice.which)) {
+						controller = nullptr;
+						std::cout << "Removed controller\n";
+					}
+					break;
 				default: break;
+			}
+		}
+
+		if (controller != nullptr) {
+			for (int i = SDL_CONTROLLER_BUTTON_INVALID; i < SDL_CONTROLLER_BUTTON_MAX; i++) {
+				input_current_gamepad_button_state[i] = SDL_GameControllerGetButton(controller, (SDL_GameControllerButton) i);
+			}
+
+			for (int i = SDL_CONTROLLER_AXIS_INVALID; i < SDL_CONTROLLER_AXIS_MAX; i++) {
+				input_gamepad_axis_state[i] = static_cast<Uint8>(SDL_GameControllerGetAxis(controller, (SDL_GameControllerAxis) i));
 			}
 		}
 

@@ -20,7 +20,7 @@ end
 --
 
 function tsab_update(dt)
-	if tsab_input_was_pressed("escape") then
+	if tsab_input_was_pressed("controller_x") then
 		tsab_quit()
 		return
 	end
