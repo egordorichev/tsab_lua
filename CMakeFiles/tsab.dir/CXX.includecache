@@ -21,6 +21,8 @@ cstring
 -
 map
 -
+vector
+-
 
 /usr/include/SDL2/SDL.h
 SDL_main.h

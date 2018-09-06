@@ -6,6 +6,7 @@
 #include <string>
 #include <cstring>
 #include <map>
+#include <vector>
 
 #define MOUSE_1 0
 #define MOUSE_2 1
@@ -18,6 +19,7 @@
 #define MOUSE_WHEEL_RIGHT 8
 
 static bool running = true;
+static std::string working_dir = "./";
 
 /*
  * Window config
@@ -28,8 +30,6 @@ static int window_height = 480;
 static bool resizeable = true;
 
 static Uint32 pack_window_flags() {
-
-
 	return 0;
 }
 
@@ -595,10 +595,52 @@ static int tsab_graphics_get_color(lua_State *L) {
 	return 4;
 }
 
-int main(int, char **) {
+/*
+ * Shaders
+ */
+
+static std::vector<GPU_ShaderBlock> shader_blocks;
+static std::vector<Uint32> shaders;
+
+static int tsab_shaders_new(lua_State *L) {
+	std::cout << "str: `" << luaL_checkstring(L, 1) << "`" << std::endl;
+	const char *filename = (working_dir + std::string(luaL_checkstring(L, 1))).c_str();
+
+	std::cout << "filename: " << filename << std::endl;
+
+	Uint32 v = GPU_LoadShader(GPU_VERTEX_SHADER, (working_dir + "/default.vert").c_str());
+
+	if (!v) {
+		GPU_LogError("Failed to load vertex shader: %s\n", GPU_GetShaderMessage());
+	}
+
+	Uint32 f = GPU_LoadShader(GPU_FRAGMENT_SHADER, filename);
+
+	if (!f) {
+		GPU_LogError("Failed to load fragment shader: %s\n", GPU_GetShaderMessage());
+	}
+
+	Uint32 p = GPU_LinkShaders(v, f);
+
+	if (!p) {
+		GPU_LogError("Failed to link shader program: %s\n", GPU_GetShaderMessage());
+	}
+
+	shader_blocks.push_back(GPU_LoadShaderBlock(p, "v_Vertex", "v_TexCoord", "v_Color", "v_ProjectionMatrix"));
+	shaders.push_back(p);
+	lua_pushnumber(L, shaders.size() - 1);
+
+	return 1;
+}
+
+int main(int arg, char **argv) {
+	if (arg >= 2) {
+		working_dir = argv[1];
+	}
+
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	SDL_Init(SDL_INIT_EVERYTHING);
-	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
+	SDL_GameControllerAddMappingsFromFile((working_dir + "/gamecontrollerdb.txt").c_str());
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
@@ -627,13 +669,15 @@ int main(int, char **) {
 	lua_register(L, "tsab_graphics_line", tsab_graphics_line);
 	lua_register(L, "tsab_graphics_ellipse", tsab_graphics_ellipse);
 	lua_register(L, "tsab_graphics_triangle", tsab_graphics_triangle);
+	// Shaders API
+	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
 	GPU_Clear(screen);
 
 	// Do the api file
-	int rv = luaL_dofile(L, "api.lua");
+	int rv = luaL_dofile(L, (working_dir + "/api.lua").c_str());
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
@@ -641,7 +685,7 @@ int main(int, char **) {
 	}
 
 	// Do the main files
-	rv = luaL_loadfile(L, "main.lua");
+	rv = luaL_loadfile(L, (working_dir + "/main.lua").c_str());
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;

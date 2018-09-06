@@ -3,10 +3,12 @@
 --
 
 local canvas
+local shader
 
 function tsab_init()
 	print("hi!")
 	canvas = tsab.graphics.new_canvas(640 / 2, 480 / 2)
+	shader = tsab.shaders.new("default.frag")
 end
 
 function tsab_destroy()

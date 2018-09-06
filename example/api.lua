@@ -85,3 +85,10 @@ tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 		end
 	end
 end
+
+--
+-- shaders
+--
+
+tsab.shaders = {}
+tsab.shaders.new = tsab_shaders_new
