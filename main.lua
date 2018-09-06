@@ -12,7 +12,7 @@ end
 
 function tsab_error(message)
 	print("tsab_error: " .. message)
-	os.exit()
+	tsab_quit()
 end
 
 --
@@ -20,17 +20,9 @@ end
 --
 
 function tsab_update(dt)
-	if tsab_input_was_pressed("controller_start") then
+	if tsab_input_was_pressed("escape") then
 		tsab_quit()
 		return
-	end
-
-	if tsab_input_is_down("a") then
-		print("a key is down")
-	end
-
-	if tsab_input_was_released("a") then
-		print("a was released")
 	end
 end
 

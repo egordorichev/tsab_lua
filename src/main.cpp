@@ -210,6 +210,18 @@ static int tsab_input_get_axis(lua_State *L) {
 	return 1;
 }
 
+static int tsab_input_get_mouse_position(lua_State *L) {
+	int x = 0;
+	int y = 0;
+
+	SDL_GetMouseState(&x, &y);
+
+	lua_pushnumber(L, x);
+	lua_pushnumber(L, y);
+
+	return 2;
+}
+
 static int tsab_input_was_released(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
@@ -409,6 +421,7 @@ int main(int, char **) {
 	// Register API
 	lua_pushcfunction(L, traceback);
 	lua_register(L, "tsab_quit", tsab_quit);
+	lua_register(L, "tsab_input_get_mouse_position", tsab_input_get_mouse_position);
 	lua_register(L, "tsab_input_is_down", tsab_input_is_down);
 	lua_register(L, "tsab_input_was_released", tsab_input_was_released);
 	lua_register(L, "tsab_input_was_pressed", tsab_input_was_pressed);
