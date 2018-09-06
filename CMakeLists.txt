@@ -10,10 +10,11 @@ include_directories(include/ libs/include/)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -std=c++14 -std=c++1z -std=c++17 -std=gnu++17")
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_ttf REQUIRED)
 
 if(SDL2_FOUND)
-	include_directories(${SDL2_INCLUDE_DIR})
-	target_link_libraries(tsab ${SDL2_LIBRARY})
+	include_directories(${SDL2_INCLUDE_DIR} ${SDL_TTF_INCLUDE_DIR})
+	target_link_libraries(tsab ${SDL2_LIBRARY} ${SDL_TTF_LIBRARY})
 endif()
 
 link_directories(libs/)

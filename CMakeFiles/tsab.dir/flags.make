@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++1y -std=c++14 -std=c++1z -std=c++17 -std=gnu++17 -g
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/egor/tsab/include -I/home/egor/tsab/libs/include -I/usr/include/SDL2 -I/usr/include/luajit-2.0 
+CXX_INCLUDES = -I/home/egor/tsab/include -I/home/egor/tsab/libs/include -I/usr/include/SDL2 -I/usr/include/SDL -I/usr/include/luajit-2.0 
 

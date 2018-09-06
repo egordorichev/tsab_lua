@@ -27,5 +27,5 @@ function tsab.update(dt)
 end
 
 function tsab.draw()
-	
+	tsab.graphics.print("hello, world!", 10, 10)
 end

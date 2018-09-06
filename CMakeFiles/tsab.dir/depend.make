@@ -41,6 +41,7 @@ CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_system.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_thread.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_timer.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_touch.h
+CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_ttf.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_version.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_video.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/begin_code.h

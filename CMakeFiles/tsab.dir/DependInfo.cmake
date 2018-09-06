@@ -13,6 +13,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "include"
   "libs/include"
   "/usr/include/SDL2"
+  "/usr/include/SDL"
   "/usr/include/luajit-2.0"
   )
 

@@ -47,6 +47,7 @@
 					<Add directory="/home/egor/tsab/include"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
 					<Add directory="/usr/include/SDL2"/>
+					<Add directory="/usr/include/SDL"/>
 					<Add directory="/usr/include/luajit-2.0"/>
 				</Compiler>
 				<MakeCommands>
@@ -66,6 +67,7 @@
 					<Add directory="/home/egor/tsab/include"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
 					<Add directory="/usr/include/SDL2"/>
+					<Add directory="/usr/include/SDL"/>
 					<Add directory="/usr/include/luajit-2.0"/>
 				</Compiler>
 				<MakeCommands>
@@ -86,6 +88,9 @@
 			<Option virtualFolder="CMake Files\cmake\"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/cmake/FindSDL2.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/cmake/FindSDL2_ttf.cmake">
 			<Option virtualFolder="CMake Files\cmake\"/>
 		</Unit>
 	</Project>

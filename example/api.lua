@@ -2,7 +2,6 @@ tsab = {}
 tsab.quit = tsab_quit
 tsab.update = function() end
 tsab.draw = function() end
-tsab.init = function() end
 tsab.destroy = function() end
 tsab.error = function() end
 
@@ -83,6 +82,9 @@ tsab.graphics.line = tsab_graphics_line
 tsab.graphics.ellipse = tsab_graphics_ellipse
 tsab.graphics.triangle = tsab_graphics_triangle
 tsab.graphics.camera = tsab_graphics_camera
+tsab.graphics.new_font = tsab_graphics_new_font
+tsab.graphics.set_font = tsab_graphics_set_font
+tsab.graphics.print = tsab_graphics_print
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then
@@ -130,6 +132,10 @@ tsab.shaders.send_vec4 = tsab_shaders_send_vec4
 tsab.shaders.send_float = tsab_shaders_send_float
 
 tsab.shaders.get_default = function() return default_shader end
+
+function tsab_init()
+	tsab.graphics.new_font("/home/egor/tsab/example/font.ttf")
+end
 
 function tsab_draw()
 	tsab.shaders.set(default_shader)

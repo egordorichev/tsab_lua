@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <SDL_GPU/SDL_gpu.h>
 #include <LuaJIT/lua.hpp>
 
@@ -671,6 +672,58 @@ static int tsab_graphics_camera(lua_State *L) {
 	return 0;
 }
 
+static std::vector<TTF_Font *> fonts;
+static TTF_Font *active_font;
+
+static int tsab_graphics_new_font(lua_State *L) {
+	const char *name = luaL_checkstring(L, 1);
+	int size = check_number(L, 2, 14);
+
+	TTF_Font *font = TTF_OpenFont(name, size);
+
+	if (font == nullptr) {
+		std::cerr << "Failed to load font " << name << ": " << TTF_GetError() << std::endl;
+		return -1;
+	}
+
+	if (active_font == nullptr) {
+		active_font = font;
+	}
+
+	fonts.push_back(font);
+	lua_pushnumber(L, fonts.size() - 1);
+
+	return 1;
+}
+
+static int tsab_graphics_set_font(lua_State *L) {
+	int id = luaL_checknumber(L, 1);
+
+	if (id > - 1 && id < fonts.size()) {
+		active_font = fonts[id];
+	}
+
+	return 0;
+}
+
+static int tsab_graphics_print(lua_State *L) {
+	auto *target = (GPU_Image *)lua_touserdata(L, 1);
+	auto *font = static_cast<TTF_Font *>(lua_touserdata(L, 2));
+	const char *text = luaL_checkstring(L, 3);
+	double x = luaL_checknumber(L, 4);
+	double y = luaL_checknumber(L, 5);
+	double r = luaL_checknumber(L, 6);
+	double sx = luaL_checknumber(L, 7);
+	double sy = luaL_checknumber(L, 8);
+
+	SDL_Surface *surface = TTF_RenderUTF8_Blended(font, text, current_color);
+	GPU_Image *image = GPU_CopyImageFromSurface(surface);
+	GPU_BlitTransformX(image, nullptr, target->target, x, y, image->w/2, image->h/2, r, sx, sy);
+	SDL_FreeSurface(surface);
+
+	return 0;
+}
+
 /*
  * Shaders
  */
@@ -714,7 +767,7 @@ static int tsab_shaders_set(lua_State *L) {
 
 	Uint32 p = luaL_checknumber(L, 1);
 
-	if (shaders.size() <= p) {
+	if (p >= -1 && shaders.size() <= p) {
 		return 0;
 	}
 
@@ -762,7 +815,21 @@ int main(int arg, char **argv) {
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	GPU_SetRequiredFeatures(GPU_FEATURE_BASIC_SHADERS);
 	SDL_Init(SDL_INIT_EVERYTHING);
+	TTF_Init();
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
+
+	const SDL_version *linked_version = TTF_Linked_Version();
+	SDL_version compiled_version;
+	SDL_TTF_VERSION(&compiled_version);
+
+	// not same versions, lol
+
+	std::cout << "Linked version:\n"
+	          << (double) linked_version->major << "." << (double) linked_version->minor << "." << (double) linked_version->patch;
+
+	std::cout << "Compiled version:\n"
+	          << (double) compiled_version.major << "." << (double) compiled_version.minor << "." << (double) compiled_version.patch << std::endl << std::endl;
+
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
@@ -792,6 +859,9 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_ellipse", tsab_graphics_ellipse);
 	lua_register(L, "tsab_graphics_triangle", tsab_graphics_triangle);
 	lua_register(L, "tsab_graphics_camera", tsab_graphics_camera);
+	lua_register(L, "tsab_graphics_new_font", tsab_graphics_new_font);
+	lua_register(L, "tsab_graphics_set_font", tsab_graphics_set_font);
+	lua_register(L, "tsab_graphics_print", tsab_graphics_print);
 	// Shaders API
 	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
 	lua_register(L, "tsab_shaders_set", tsab_shaders_set);
@@ -963,6 +1033,7 @@ int main(int arg, char **argv) {
 	delete input_current_mouse_state;
 	delete input_previous_keyboard_state;
 
+	TTF_Quit();
 	GPU_Quit();
 
 	// Call destroy
