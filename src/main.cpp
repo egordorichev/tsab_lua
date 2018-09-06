@@ -450,11 +450,10 @@ static double check_number(lua_State *L, int index, double default_number) {
 	return default_number;
 }
 
-static int active_shader;
+static int active_shader = -1;
 
 static int tsab_graphics_draw(lua_State *L) {
-	if (active_shader > 0) {
-		std::cout << GPU_GetUniformLocation(shaders[active_shader], "textured") << " set\n";
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
 	}
 
@@ -480,7 +479,7 @@ static int tsab_graphics_draw(lua_State *L) {
 }
 
 static int tsab_graphics_draw_to_texture(lua_State *L) {
-	if (active_shader > 0) {
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
 	}
 
@@ -506,7 +505,7 @@ static int tsab_graphics_draw_to_texture(lua_State *L) {
 }
 
 static int tsab_graphics_circle(lua_State *L) {
-	if (active_shader > 0) {
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
 	}
 
@@ -524,8 +523,28 @@ static int tsab_graphics_circle(lua_State *L) {
 	return 0;
 }
 
+static int tsab_graphics_rectangle(lua_State *L) {
+	if (active_shader > -1) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
+	}
+
+	double x = luaL_checknumber(L, 1);
+	double y = luaL_checknumber(L, 2);
+	double w = luaL_checknumber(L, 3);
+	double h = luaL_checknumber(L, 4);
+	bool filled = check_bool(L, 5, true);
+
+	if (filled) {
+		GPU_RectangleFilled(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
+	} else {
+		GPU_Rectangle(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
+	}
+
+	return 0;
+}
+
 static int tsab_graphics_ellipse(lua_State *L) {
-	if (active_shader > 0) {
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
 	}
 
@@ -545,28 +564,8 @@ static int tsab_graphics_ellipse(lua_State *L) {
 	return 0;
 }
 
-static int tsab_graphics_rectangle(lua_State *L) {
-	if (active_shader > 0) {
-		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
-	}
-
-	double x = luaL_checknumber(L, 1);
-	double y = luaL_checknumber(L, 2);
-	double w = luaL_checknumber(L, 3);
-	double h = luaL_checknumber(L, 4);
-	bool filled = check_bool(L, 5, true);
-
-	if (filled) {
-		GPU_RectangleFilled(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
-	} else {
-		GPU_Rectangle(current_target == nullptr ? screen : current_target->target, x, y, x + w, y + h, current_color);
-	}
-
-	return 0;
-}
-
 static int tsab_graphics_triangle(lua_State *L) {
-	if (active_shader > 0) {
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
 	}
 
@@ -589,7 +588,7 @@ static int tsab_graphics_triangle(lua_State *L) {
 }
 
 static int tsab_graphics_point(lua_State *L) {
-	if (active_shader > 0) {
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
 	}
 
@@ -602,7 +601,7 @@ static int tsab_graphics_point(lua_State *L) {
 }
 
 static int tsab_graphics_line(lua_State *L) {
-	if (active_shader > 0) {
+	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 0);
 	}
 
@@ -679,7 +678,7 @@ static int tsab_shaders_new(lua_State *L) {
 
 static int tsab_shaders_set(lua_State *L) {
 	if (lua_isnil(L, 1)) {
-		active_shader = 0;
+		active_shader = -1;
 		GPU_ActivateShaderProgram(0, nullptr);
 		return 0;
 	}

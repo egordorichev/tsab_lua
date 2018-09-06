@@ -11,14 +11,6 @@ tsab_update = function() tsab.update() end
 tsab_destroy = function() tsab.destroy() end
 tsab_error = function() tsab.error() end
 
-local default_shader
-
-function tsab_draw()
-	tsab.shaders.set(default_shader)
-	tsab.draw()
-	tsab.shaders.set(nil)
-end
-
 --
 -- input
 --
@@ -130,9 +122,15 @@ tsab.shaders.set = function(v)
 	tsab_shaders_set(v)
 end
 
-default_shader = 	tsab.shaders.new("default.frag")
+local default_shader = 	tsab.shaders.new("default.frag")
 tsab.shaders.set(default_shader)
 tsab.graphics.color()
 tsab.shaders.set()
 
 tsab.shaders.get_default = function() return default_shader end
+
+function tsab_draw()
+	tsab.shaders.set(default_shader)
+	tsab.draw()
+	tsab.shaders.set()
+end
