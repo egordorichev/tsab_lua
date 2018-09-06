@@ -51,11 +51,12 @@ tsab.graphics.new_canvas = function(w, h)
 	return ins
 end
 
-tsab.graphics.set_color = tsab_graphics_color
+tsab.graphics.color = tsab_graphics_set_color
 tsab.graphics.get_color = tsab_graphics_get_color
 tsab.graphics.circle = tsab_graphics_circle
 tsab.graphics.rectangle = tsab_graphics_rectangle
 tsab.graphics.point = tsab_graphics_point
+tsab.graphics.line = tsab_graphics_line
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then

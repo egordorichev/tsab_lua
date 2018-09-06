@@ -36,6 +36,7 @@ function tsab_draw()
 	tsab.graphics.rectangle(32, 32, 64, 32)
 	tsab.graphics.color(0, 1, 0, 1)
 	tsab.graphics.circle(64, 64, 16)
+	tsab.graphics.line(1, 1, 32, 64)
 	tsab.graphics.color()
 	tsab.graphics.point(1, 1)
 

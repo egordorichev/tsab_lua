@@ -6,7 +6,6 @@
 #include <string>
 #include <cstring>
 #include <map>
-#include <algorithm>
 
 #define MOUSE_1 0
 #define MOUSE_2 1
@@ -525,12 +524,16 @@ static int tsab_graphics_point(lua_State *L) {
 static int tsab_graphics_line(lua_State *L) {
 	double x1 = luaL_checknumber(L, 1);
 	double y1 = luaL_checknumber(L, 2);
-	double x2 = luaL_checknumber(L, 1);
-	double y2 = luaL_checknumber(L, 2);
+	double x2 = luaL_checknumber(L, 3);
+	double y2 = luaL_checknumber(L, 4);
 
-	GPU_Pixel(current_target == nullptr ? screen : current_target->target, x + 0.5, y + 0.5, current_color);
+	GPU_Line(current_target == nullptr ? screen : current_target->target, x1 + 0.5, y1 + 0.5, x2 + 0.5, y2 + 0.5, current_color);
 
 	return 0;
+}
+
+static int clamp(int val, int min, int max) {
+	return std::min(std::max(min, val), max);
 }
 
 static int tsab_graphics_set_color(lua_State *L) {
@@ -539,10 +542,10 @@ static int tsab_graphics_set_color(lua_State *L) {
 	double b = check_number(L, 3, 1);
 	double a = check_number(L, 4, 1);
 
-	current_color.r = std::clamp<int>(std::round(r * 255), 0, 255);
-	current_color.g = std::clamp<int>(std::round(g * 255), 0, 255);
-	current_color.b = std::clamp<int>(std::round(b * 255), 0, 255);
-	current_color.a = std::clamp<int>(std::round(a * 255), 0, 255);
+	current_color.r = clamp(r * 255, 0, 255);
+	current_color.g = clamp(g * 255, 0, 255);
+	current_color.b = clamp(b * 255, 0, 255);
+	current_color.a = clamp(a * 255, 0, 255);
 
 	return 0;
 }
@@ -585,6 +588,7 @@ int main(int, char **) {
 	lua_register(L, "tsab_graphics_circle", tsab_graphics_circle);
 	lua_register(L, "tsab_graphics_rectangle", tsab_graphics_rectangle);
 	lua_register(L, "tsab_graphics_point", tsab_graphics_point);
+	lua_register(L, "tsab_graphics_line", tsab_graphics_line);
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
