@@ -13,8 +13,8 @@ find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)
 
 if(SDL2_FOUND)
-	include_directories(${SDL2_INCLUDE_DIR} ${SDL_TTF_INCLUDE_DIR})
-	target_link_libraries(tsab ${SDL2_LIBRARY} ${SDL_TTF_LIBRARY})
+	include_directories(${SDL2_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIRS})
+	target_link_libraries(tsab ${SDL2_LIBRARY} ${SDL2_TTF_LIBRARIES})
 endif()
 
 link_directories(libs/)

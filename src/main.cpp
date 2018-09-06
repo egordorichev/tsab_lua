@@ -72,6 +72,8 @@ static void report_lua_error(lua_State *L) {
 	lua_getglobal(L, "tsab_error");
 	lua_pushstring(L, error);
 	lua_pcall(L, 1, 0, 0);
+
+	std::cerr << error << "\n";
 }
 
 Uint8 *input_previous_gamepad_button_state;
@@ -706,19 +708,43 @@ static int tsab_graphics_set_font(lua_State *L) {
 	return 0;
 }
 
-static int tsab_graphics_print(lua_State *L) {
-	auto *target = (GPU_Image *)lua_touserdata(L, 1);
-	auto *font = static_cast<TTF_Font *>(lua_touserdata(L, 2));
-	const char *text = luaL_checkstring(L, 3);
-	double x = luaL_checknumber(L, 4);
-	double y = luaL_checknumber(L, 5);
-	double r = luaL_checknumber(L, 6);
-	double sx = luaL_checknumber(L, 7);
-	double sy = luaL_checknumber(L, 8);
+static int tsab_graphics_print_to_texture(lua_State *L) {
+	if (active_shader > -1) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
+	}
 
-	SDL_Surface *surface = TTF_RenderUTF8_Blended(font, text, current_color);
+	auto *target = (GPU_Image *) lua_touserdata(L, 1);
+	const char *text = luaL_checkstring(L, 3);
+	double x = check_number(L, 3, 0);
+	double y = check_number(L, 4, 0);
+	double r = check_number(L, 5, 0);
+	double sx = check_number(L, 6, 1);
+	double sy = check_number(L, 7, 1);
+
+	SDL_Surface *surface = TTF_RenderUTF8_Blended(active_font, text, current_color);
 	GPU_Image *image = GPU_CopyImageFromSurface(surface);
-	GPU_BlitTransformX(image, nullptr, target->target, x, y, image->w/2, image->h/2, r, sx, sy);
+	GPU_BlitTransformX(image, nullptr, target->target, x + image->w/2, y + image->h/2, image->w/2, image->h/2, r, sx, sy);
+	SDL_FreeSurface(surface);
+
+	return 0;
+}
+
+static int tsab_graphics_print(lua_State *L) {
+	if (active_shader > -1) {
+		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
+	}
+
+	auto *target = (GPU_Target *) lua_touserdata(L, 1);
+	const char *text = luaL_checkstring(L, 2);
+	double x = check_number(L, 3, 0);
+	double y = check_number(L, 4, 0);
+	double r = check_number(L, 5, 0);
+	double sx = check_number(L, 6, 1);
+	double sy = check_number(L, 7, 1);
+
+	SDL_Surface *surface = TTF_RenderUTF8_Blended(active_font, text, current_color);
+	GPU_Image *image = GPU_CopyImageFromSurface(surface);
+	GPU_BlitTransformX(image, nullptr, target, x + image->w/2, y + image->h/2, image->w/2, image->h/2, r, sx, sy);
 	SDL_FreeSurface(surface);
 
 	return 0;
@@ -818,19 +844,6 @@ int main(int arg, char **argv) {
 	TTF_Init();
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 
-	const SDL_version *linked_version = TTF_Linked_Version();
-	SDL_version compiled_version;
-	SDL_TTF_VERSION(&compiled_version);
-
-	// not same versions, lol
-
-	std::cout << "Linked version:\n"
-	          << (double) linked_version->major << "." << (double) linked_version->minor << "." << (double) linked_version->patch;
-
-	std::cout << "Compiled version:\n"
-	          << (double) compiled_version.major << "." << (double) compiled_version.minor << "." << (double) compiled_version.patch << std::endl << std::endl;
-
-
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
@@ -862,6 +875,7 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_new_font", tsab_graphics_new_font);
 	lua_register(L, "tsab_graphics_set_font", tsab_graphics_set_font);
 	lua_register(L, "tsab_graphics_print", tsab_graphics_print);
+	lua_register(L, "tsab_graphics_print_to_texture", tsab_graphics_print_to_texture);
 	// Shaders API
 	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
 	lua_register(L, "tsab_shaders_set", tsab_shaders_set);

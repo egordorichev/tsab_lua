@@ -15,7 +15,6 @@ end
 
 function tsab.error(message)
 	print("tsab_error: " .. message)
-	tsab.quit()
 end
 
 --
@@ -27,5 +26,5 @@ function tsab.update(dt)
 end
 
 function tsab.draw()
-	tsab.graphics.print("hello, world!", 10, 10)
+	tsab.graphics.print("Hello, world!", 64, 64, 10, 2, 0.5)
 end

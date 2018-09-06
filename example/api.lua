@@ -84,7 +84,14 @@ tsab.graphics.triangle = tsab_graphics_triangle
 tsab.graphics.camera = tsab_graphics_camera
 tsab.graphics.new_font = tsab_graphics_new_font
 tsab.graphics.set_font = tsab_graphics_set_font
-tsab.graphics.print = tsab_graphics_print
+
+tsab.graphics.print = function(str, x, y, r, sx, sy)
+	if tsab_active_canvas.screen then
+		tsab_graphics_print(tsab_active_canvas.pointer, str, x, y, r, sx, sy)
+	else
+		tsab_graphics_print_to_texture(tsab_active_canvas.pointer, str, x, y, r, sx, sy)
+	end
+end
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then
@@ -134,7 +141,7 @@ tsab.shaders.send_float = tsab_shaders_send_float
 tsab.shaders.get_default = function() return default_shader end
 
 function tsab_init()
-	tsab.graphics.new_font("/home/egor/tsab/example/font.ttf")
+	tsab.graphics.new_font("font.ttf", 18)
 end
 
 function tsab_draw()
