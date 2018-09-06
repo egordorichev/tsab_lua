@@ -50,10 +50,28 @@ tsab.graphics.circle = function(x, y, r)
 	tsab_graphics_circle(tsab_active_canvas.pointer, x, y, r)
 end
 
-tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy)
+tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if tsab_active_canvas.screen then
-		tsab_graphics_draw(tsab_active_canvas.pointer, what.pointer, x, y, a, ox, oy, sx, sy)
+		if type(x) == "table" then
+			local src_x = x.x or x[1]
+			local src_y = x.y or x[2]
+			local src_w = x.w or x[3]
+			local src_h = x.h or x[4]
+
+			tsab_graphics_draw(tsab_active_canvas.pointer, what.pointer, y, a, ox, oy, sx, sy, e, src_x, src_y, src_w, src_h)
+		else
+			tsab_graphics_draw(tsab_active_canvas.pointer, what.pointer, x, y, a, ox, oy, sx, sy, 0, 0, what.w, what.h)
+		end
 	else
-		tsab_graphics_draw_to_texture(tsab_active_canvas.pointer, what.pointer, x, y, a, ox, oy, sx, sy)
+		if type(x) == "table" then
+			local src_x = x.x or x[1]
+			local src_y = x.y or x[2]
+			local src_w = x.w or x[3]
+			local src_h = x.h or x[4]
+
+			tsab_graphics_draw_to_texture(tsab_active_canvas.pointer, what.pointer, y, a, ox, oy, sx, sy, e, src_x, src_y, src_w, src_h)
+		else
+			tsab_graphics_draw_to_texture(tsab_active_canvas.pointer, what.pointer, x, y, a, ox, oy, sx, sy)
+		end
 	end
 end

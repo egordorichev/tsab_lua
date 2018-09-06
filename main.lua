@@ -33,5 +33,5 @@ function tsab_draw()
 	tsab.graphics.set_canvas(canvas)
 	tsab.graphics.circle(32, 32, 32)
 	tsab.graphics.set_canvas(nil)
-	tsab.graphics.draw(canvas, 0, 0, 0, 0, 0, 2, 2)
+	tsab.graphics.draw(canvas, {0,0,32,32}, 0, 0, 0, 0, 0, 2, 2)
 end

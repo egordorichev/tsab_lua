@@ -438,8 +438,13 @@ static int tsab_graphics_draw(lua_State *L) {
 	double oy = luaL_checknumber(L, 7);
 	double sx = luaL_checknumber(L, 8);
 	double sy = luaL_checknumber(L, 9);
+	double src_x = luaL_checknumber(L, 10);
+	double src_y = luaL_checknumber(L, 11);
+	double src_w = luaL_checknumber(L, 12);
+	double src_h = luaL_checknumber(L, 13);
 
-	GPU_BlitTransformX(what, nullptr, target, x, y, ox, oy, a, sx, sy);
+	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
+	GPU_BlitTransformX(what, &r, target, x, y, ox, oy, a, sx, sy);
 
 	return 0;
 }
@@ -455,8 +460,13 @@ static int tsab_graphics_draw_to_texture(lua_State *L) {
 	double oy = luaL_checknumber(L, 7);
 	double sx = luaL_checknumber(L, 8);
 	double sy = luaL_checknumber(L, 9);
+	double src_x = luaL_checknumber(L, 10);
+	double src_y = luaL_checknumber(L, 11);
+	double src_w = luaL_checknumber(L, 12);
+	double src_h = luaL_checknumber(L, 13);
 
-	GPU_BlitTransformX(what, nullptr, target->target, x, y, ox, oy, a, sx, sy);
+	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
+	GPU_BlitTransformX(what, &r, target->target, x, y, ox, oy, a, sx, sy);
 
 	return 0;
 }
