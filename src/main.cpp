@@ -18,6 +18,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <SDL_syswm.h>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -43,19 +44,8 @@ static bool running = true;
 static std::string working_dir = "./";
 static int fps;
 
-/*
- * Window config
- */
-
-static int window_width = 640;
-static int window_height = 480;
-static bool resizeable = true;
 static std::vector<GPU_ShaderBlock> shader_blocks;
 static std::vector<Uint32> shaders;
-
-static Uint32 pack_window_flags() {
-	return 0;
-}
 
 /*
  * Lua stuff
@@ -469,6 +459,14 @@ static double check_number(lua_State *L, int index, double default_number) {
 	}
 
 	return default_number;
+}
+
+static const char *check_string(lua_State *L, int index, const char *default_str) {
+	if (lua_isstring(L, index)) {
+		return lua_tostring(L, index);
+	}
+
+	return default_str;
 }
 
 static int active_shader = -1;
@@ -947,15 +945,60 @@ int main(int arg, char **argv) {
 		chdir(working_dir.c_str());
 	}
 
+	// Do the config file
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+
+	int rv = luaL_dofile(L, "config.lua");
+
+	if (rv) {
+		std::cerr << lua_tostring(L, -1) << std::endl;
+		return rv;
+	}
+
+	lua_getglobal(L, "config");
+	lua_pushstring(L, "window");
+	lua_gettable(L, -2);
+
+
+	int window_width = 640;
+	int window_height = 480;
+	bool resizeable;
+	char *window_title;
+
+	if (!lua_isnil(L, -1)) {
+		lua_pushstring(L, "width");
+		lua_gettable(L, -2);
+		window_width = check_number(L, -1, window_width);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "height");
+		lua_gettable(L, -2);
+		window_height = check_number(L, -1, window_height);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "resizeable");
+		lua_gettable(L, -2);
+		resizeable = check_bool(L, -1, true);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "title");
+		lua_gettable(L, -2);
+		window_title = (char *) check_string(L, -1, "To Steam and beyond!");
+		lua_pop(L, 1);
+	}
+
+	lua_pop(L, 1); // Window level
+	lua_pop(L, 1);
+	
+	// return 0;
+
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	GPU_SetRequiredFeatures(GPU_FEATURE_BASIC_SHADERS);
 	SDL_Init(SDL_INIT_EVERYTHING);
 	TTF_Init();
 	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
-
-	lua_State *L = luaL_newstate();
-	luaL_openlibs(L);
 
 	// Register API
 	lua_pushcfunction(L, traceback);
@@ -1003,11 +1046,20 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);
 
 	// Create window
-	screen = GPU_Init(window_width, window_height, pack_window_flags());
+	int flags = SDL_WINDOW_SHOWN;
+
+	if (resizeable) {
+		flags |= SDL_WINDOW_RESIZABLE;
+	}
+
+	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	GPU_SetInitWindow(SDL_GetWindowID(window));
+	screen = GPU_Init(window_width, window_height, GPU_DEFAULT_INIT_FLAGS);
 	GPU_Clear(screen);
 
 	// Do the api file
-	int rv = luaL_dofile(L, "api.lua");
+	rv = luaL_dofile(L, "api.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
@@ -1187,6 +1239,8 @@ int main(int arg, char **argv) {
 	Mix_CloseAudio();
 	TTF_Quit();
 	GPU_Quit();
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
 
 	// Call destroy
 	lua_pushcfunction(L, traceback);

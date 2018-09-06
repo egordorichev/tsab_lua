@@ -10,6 +10,7 @@ CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_blendmode.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_clipboard.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_config.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_cpuinfo.h
+CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_egl.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_endian.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_error.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_events.h
@@ -39,6 +40,7 @@ CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_shape.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_stdinc.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_surface.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_system.h
+CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_syswm.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_thread.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_timer.h
 CMakeFiles/tsab.dir/src/main.cpp.o: /usr/include/SDL2/SDL_touch.h
