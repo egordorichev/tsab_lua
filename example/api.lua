@@ -6,7 +6,7 @@ tsab.destroy = function() end
 tsab.error = function() end
 
 tsab_init = function() tsab.init() end
-tsab_update = function() tsab.update() end
+tsab_update = function(dt) tsab.update(dt) end
 tsab_destroy = function() tsab.destroy() end
 tsab_error = function() tsab.error() end
 
@@ -142,6 +142,7 @@ tsab.shaders.get_default = function() return default_shader end
 
 function tsab_init()
 	tsab.graphics.new_font("font.ttf", 18)
+	tsab.init()
 end
 
 function tsab_draw()

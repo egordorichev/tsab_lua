@@ -1,5 +1,6 @@
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <SDL_GPU/SDL_gpu.h>
 #include <LuaJIT/lua.hpp>
 
@@ -827,6 +828,70 @@ static int tsab_shaders_send_vec4(lua_State *L) {
 	return 0;
 }
 
+/*
+ * Audio
+ */
+
+static std::vector<Mix_Music *> music_list;
+static std::vector<Mix_Chunk *> sfx_list;
+
+static int tsab_audio_new_music(lua_State *L) {
+	const char *name = luaL_checkstring(L, 1);
+	Mix_Music *music = Mix_LoadMUS(name);
+
+	if (music == nullptr) {
+		std::cerr << Mix_GetError() << std::endl;
+		lua_pushnumber(L, -1);
+		return 1;
+	}
+
+	music_list.push_back(music);
+	lua_pushnumber(L, music_list.size() - 1);
+
+	return 1;
+}
+
+static int tsab_audio_play_music(lua_State *L) {
+	int id = luaL_checknumber(L, 1);
+	bool looping = check_bool(L, 2, true);
+
+	if (id > -1 && id < music_list.size()) {
+		if (Mix_PlayMusic(music_list[id], looping ? -1 : 0) == -1) {
+			std::cerr << Mix_GetError() << std::endl;
+		}
+	}
+
+	return 0;
+}
+
+static int tsab_audio_new_sfx(lua_State *L) {
+	const char *name = luaL_checkstring(L, 1);
+	Mix_Chunk *sfx = Mix_LoadWAV(name);
+
+	if (sfx == nullptr) {
+		std::cerr << Mix_GetError() << std::endl;
+		lua_pushnumber(L, -1);
+		return 1;
+	}
+
+	sfx_list.push_back(sfx);
+	lua_pushnumber(L, sfx_list.size() - 1);
+
+	return 1;
+}
+
+static int tsab_audio_play_sfx(lua_State *L) {
+	int id = luaL_checknumber(L, 1);
+
+	if (id > -1 && id < sfx_list.size()) {
+		if (Mix_PlayChannel(-1, sfx_list[id], 0) == -1) {
+			std::cerr << Mix_GetError() << std::endl;
+		}
+	}
+
+	return 0;
+}
+
 int main(int arg, char **argv) {
 	if (arg >= 2) {
 		working_dir = std::string(argv[1]);
@@ -842,6 +907,7 @@ int main(int arg, char **argv) {
 	GPU_SetRequiredFeatures(GPU_FEATURE_BASIC_SHADERS);
 	SDL_Init(SDL_INIT_EVERYTHING);
 	TTF_Init();
+	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 
 	lua_State *L = luaL_newstate();
@@ -881,6 +947,12 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_shaders_set", tsab_shaders_set);
 	lua_register(L, "tsab_shaders_send_float", tsab_shaders_send_float);
 	lua_register(L, "tsab_shaders_send_vec4", tsab_shaders_send_vec4);
+	// Audio API
+	lua_register(L, "tsab_audio_new_music", tsab_audio_new_music);
+	lua_register(L, "tsab_audio_play_music", tsab_audio_play_music);
+	lua_register(L, "tsab_audio_new_sfx", tsab_audio_new_sfx);
+	lua_register(L, "tsab_audio_play_sfx", tsab_audio_play_sfx);
+
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
@@ -1043,10 +1115,15 @@ int main(int arg, char **argv) {
 		GPU_FreeShaderProgram(shaders[i]);
 	}
 
+	for (int i = 0; i < music_list.size(); i++) {
+		Mix_FreeMusic(music_list[i]);
+	}
+
 	delete input_previous_mouse_state;
 	delete input_current_mouse_state;
 	delete input_previous_keyboard_state;
 
+	Mix_CloseAudio();
 	TTF_Quit();
 	GPU_Quit();
 

@@ -82,6 +82,8 @@ tsab: CMakeFiles/tsab.dir/build.make
 tsab: /usr/lib/x86_64-linux-gnu/libSDL2main.a
 tsab: /usr/lib/x86_64-linux-gnu/libSDL2.so
 tsab: /usr/lib/x86_64-linux-gnu/libSDL2_ttf.so
+tsab: /usr/lib/x86_64-linux-gnu/libSDL2_image.so
+tsab: /usr/lib/x86_64-linux-gnu/libSDL2_mixer.so
 tsab: libs/SDL_GPU/libSDL2_gpu.a
 tsab: libs/SDL_GPU/libSDL2_gpu.so
 tsab: /usr/lib/x86_64-linux-gnu/libluajit-5.1.so

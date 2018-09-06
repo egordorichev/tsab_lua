@@ -7,9 +7,11 @@
 #IncludeRegexTransform: 
 
 /home/egor/tsab/src/main.cpp
-SDL.h
+SDL2/SDL.h
 -
-SDL_ttf.h
+SDL2/SDL_ttf.h
+-
+SDL2/SDL_mixer.h
 -
 SDL_GPU/SDL_gpu.h
 -
@@ -581,14 +583,6 @@ SDL_error.h
 /usr/include/SDL2/SDL_error.h
 SDL_video.h
 /usr/include/SDL2/SDL_video.h
-begin_code.h
-/usr/include/SDL2/begin_code.h
-close_code.h
-/usr/include/SDL2/close_code.h
-
-/usr/include/SDL2/SDL_ttf.h
-SDL.h
-/usr/include/SDL2/SDL.h
 begin_code.h
 /usr/include/SDL2/begin_code.h
 close_code.h
