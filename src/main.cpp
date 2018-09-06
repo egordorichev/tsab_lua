@@ -29,13 +29,9 @@ static int window_height = 480;
 static bool resizeable = true;
 
 static Uint32 pack_window_flags() {
-	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
 
-	if (resizeable) {
-		flags |= SDL_WINDOW_RESIZABLE;
-	}
 
-	return flags;
+	return 0;
 }
 
 /*
@@ -396,6 +392,75 @@ static int tsab_input_was_pressed(lua_State *L) {
 	return 1;
 }
 
+static GPU_Target *screen;
+
+static int tsab_graphics_get_default_canvas(lua_State *L) {
+	lua_pushlightuserdata(L, screen);
+	lua_pushnumber(L, screen->w);
+	lua_pushnumber(L, screen->h);
+
+	return 3;
+}
+
+static int tsab_graphics_new_canvas(lua_State *L) {
+	double w = luaL_checknumber(L, 1);
+	double h = luaL_checknumber(L, 2);
+
+	GPU_Image *image = GPU_CreateImage(w, h, GPU_FORMAT_RGBA);
+	GPU_SetImageFilter(image, GPU_FILTER_NEAREST);
+	GPU_LoadTarget(image);
+	lua_pushlightuserdata(L, image);
+
+	return 1;
+}
+
+static SDL_Color graphics_current_color = { 255, 255, 255, 255 };
+
+static int tsab_graphics_circle(lua_State *L) {
+	GPU_Image *target = (GPU_Image *) lua_touserdata(L, 1);
+
+	double x = luaL_checknumber(L, 2);
+	double y = luaL_checknumber(L, 3);
+	double r = luaL_checknumber(L, 4);
+
+	GPU_Circle(target->target, x, y, r, graphics_current_color);
+	return 0;
+}
+
+static int tsab_graphics_draw(lua_State *L) {
+	GPU_Target *target = (GPU_Target *) lua_touserdata(L, 1);
+	GPU_Image *what = (GPU_Image *) lua_touserdata(L, 2);
+
+	double x = luaL_checknumber(L, 3);
+	double y = luaL_checknumber(L, 4);
+	double a = luaL_checknumber(L, 5);
+	double ox = luaL_checknumber(L, 6);
+	double oy = luaL_checknumber(L, 7);
+	double sx = luaL_checknumber(L, 8);
+	double sy = luaL_checknumber(L, 9);
+
+	GPU_BlitTransformX(what, nullptr, target, x, y, ox, oy, a, sx, sy);
+
+	return 0;
+}
+
+static int tsab_graphics_draw_to_texture(lua_State *L) {
+	GPU_Image *target = (GPU_Image *) lua_touserdata(L, 1);
+	GPU_Image *what = (GPU_Image *) lua_touserdata(L, 2);
+
+	double x = luaL_checknumber(L, 3);
+	double y = luaL_checknumber(L, 4);
+	double a = luaL_checknumber(L, 5);
+	double ox = luaL_checknumber(L, 6);
+	double oy = luaL_checknumber(L, 7);
+	double sx = luaL_checknumber(L, 8);
+	double sy = luaL_checknumber(L, 9);
+
+	GPU_BlitTransformX(what, nullptr, target->target, x, y, ox, oy, a, sx, sy);
+
+	return 0;
+}
+
 int main(int, char **) {
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -403,7 +468,38 @@ int main(int, char **) {
 
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
-	int rv = luaL_loadfile(L, "main.lua");
+
+	// Register API
+	lua_pushcfunction(L, traceback);
+	// Main API
+	lua_register(L, "tsab_quit", tsab_quit);
+	// Input API
+	lua_register(L, "tsab_input_get_mouse_position", tsab_input_get_mouse_position);
+	lua_register(L, "tsab_input_is_down", tsab_input_is_down);
+	lua_register(L, "tsab_input_was_released", tsab_input_was_released);
+	lua_register(L, "tsab_input_was_pressed", tsab_input_was_pressed);
+	lua_register(L, "tsab_input_get_axis", tsab_input_get_axis);
+	// Graphics API
+	lua_register(L, "tsab_graphics_get_default_canvas", tsab_graphics_get_default_canvas);
+	lua_register(L, "tsab_graphics_new_canvas", tsab_graphics_new_canvas);
+	lua_register(L, "tsab_graphics_circle", tsab_graphics_circle);
+	lua_register(L, "tsab_graphics_draw", tsab_graphics_draw);
+	lua_register(L, "tsab_graphics_draw_to_texture", tsab_graphics_draw_to_texture);
+
+	// Create window
+	screen = GPU_Init(window_width, window_height, pack_window_flags());
+	GPU_Clear(screen);
+
+	// Do the api file
+	int rv = luaL_dofile(L, "api.lua");
+
+	if (rv) {
+		std::cerr << lua_tostring(L, -1) << std::endl;
+		return rv;
+	}
+
+	// Do the main files
+	rv = luaL_loadfile(L, "main.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
@@ -414,19 +510,6 @@ int main(int, char **) {
 
 	// Init key map
 	setup_key_map();
-
-	// Create window
-	GPU_Target *screen = GPU_Init(window_width, window_height, pack_window_flags());
-
-	// Register API
-	lua_pushcfunction(L, traceback);
-	lua_register(L, "tsab_quit", tsab_quit);
-	lua_register(L, "tsab_input_get_mouse_position", tsab_input_get_mouse_position);
-	lua_register(L, "tsab_input_is_down", tsab_input_is_down);
-	lua_register(L, "tsab_input_was_released", tsab_input_was_released);
-	lua_register(L, "tsab_input_was_pressed", tsab_input_was_pressed);
-	lua_register(L, "tsab_input_get_axis", tsab_input_get_axis);
-
 	// Call init
 	lua_getglobal(L, "tsab_init");
 
