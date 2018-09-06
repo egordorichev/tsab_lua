@@ -27,18 +27,5 @@ function tsab.update(dt)
 end
 
 function tsab.draw()
-	tsab.graphics.set_canvas(canvas)
-	tsab.graphics.rectangle(0, 0, 10, 10)
-	tsab.graphics.camera(10, 10)
-	tsab.graphics.rectangle(0, 0, 32, 32)
-	tsab.graphics.set_canvas()
-	tsab.graphics.camera()
-	tsab.graphics.color(1, 0.5, 0.5, 1)
-	tsab.graphics.camera(10, 10)
-	tsab.graphics.rectangle(0, 0, 64, 64)
-	tsab.graphics.camera()
-	tsab.graphics.rectangle(0, 0, 10, 10)
-	tsab.graphics.color(1, 1, 1, 0.5)
-	tsab.graphics.draw(canvas, 0, 0, 0, 0, 0, 2, 2)
-	tsab.graphics.color()
+	
 end

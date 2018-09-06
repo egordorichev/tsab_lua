@@ -666,8 +666,8 @@ static int tsab_graphics_camera(lua_State *L) {
 
 	pushed = true;
 	GPU_PushMatrix();
-	GPU_Translate(x / (current_target == nullptr ? screen->w / 2 : current_target->w / 2), y / (current_target == nullptr ? screen->h / 2 : current_target->h / 2), 0.0f);
 	GPU_Scale(s, s, 1.0f);
+	GPU_Translate(x / (current_target == nullptr ? screen->w / 2 : current_target->w / 2), y / (current_target == nullptr ? screen->h / 2 : current_target->h / 2), 0.0f);
 	return 0;
 }
 
