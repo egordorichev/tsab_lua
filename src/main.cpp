@@ -210,6 +210,122 @@ static int tsab_input_get_axis(lua_State *L) {
 	return 1;
 }
 
+static int tsab_input_was_released(lua_State *L) {
+	const char *key = luaL_checkstring(L, 1);
+
+	if (strstr(key, "controller") != nullptr) {
+		if (controller == nullptr) {
+			lua_pushboolean(L, 0); // No controller
+			return 1;
+		}
+
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_gamepad_button_state[scancode] == 0 && input_previous_gamepad_button_state[scancode] == 1) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such control " << key << std::endl;
+			lua_pushboolean(L, 0); // Control not found
+		}
+	} else if (strstr(key, "mouse") != nullptr) {
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_mouse_state[scancode] == 0 && input_previous_mouse_state[scancode] == 1) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such mouse control " << key << std::endl;
+			lua_pushboolean(L, 0); // Control not found
+		}
+	} else {
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_keyboard_state[scancode] == 0 && input_previous_keyboard_state[scancode] == 1) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such key " << key << std::endl;
+			lua_pushboolean(L, 0); // Key not found
+		}
+	}
+
+	return 1;
+}
+
+static int tsab_input_is_down(lua_State *L) {
+	const char *key = luaL_checkstring(L, 1);
+
+	if (strstr(key, "controller") != nullptr) {
+		if (controller == nullptr) {
+			lua_pushboolean(L, 0); // No controller
+			return 1;
+		}
+
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_gamepad_button_state[scancode] == 1) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such control " << key << std::endl;
+			lua_pushboolean(L, 0); // Control not found
+		}
+	} else if (strstr(key, "mouse") != nullptr) {
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_mouse_state[scancode] == 1) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such mouse control " << key << std::endl;
+			lua_pushboolean(L, 0); // Control not found
+		}
+	} else {
+		auto it = input_keyboard_map.find(key);
+
+		if (it != input_keyboard_map.end()) {
+			int scancode = it->second;
+
+			if (input_current_keyboard_state[scancode] == 1) {
+				lua_pushboolean(L, 1);
+			} else {
+				lua_pushboolean(L, 0);
+			}
+		} else {
+			std::cout << "No such key " << key << std::endl;
+			lua_pushboolean(L, 0); // Key not found
+		}
+	}
+
+	return 1;
+}
+
 static int tsab_input_was_pressed(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
@@ -293,6 +409,8 @@ int main(int, char **) {
 	// Register API
 	lua_pushcfunction(L, traceback);
 	lua_register(L, "tsab_quit", tsab_quit);
+	lua_register(L, "tsab_input_is_down", tsab_input_is_down);
+	lua_register(L, "tsab_input_was_released", tsab_input_was_released);
 	lua_register(L, "tsab_input_was_pressed", tsab_input_was_pressed);
 	lua_register(L, "tsab_input_get_axis", tsab_input_get_axis);
 

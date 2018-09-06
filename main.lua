@@ -25,15 +25,13 @@ function tsab_update(dt)
 		return
 	end
 
-	print(tsab_input_get_axis("lx"))
-
-	--[[ if tsab_input_is_down("a") then
+	if tsab_input_is_down("a") then
 		print("a key is down")
 	end
 
 	if tsab_input_was_released("a") then
 		print("a was released")
-	end ]]
+	end
 end
 
 function tsab_draw()
