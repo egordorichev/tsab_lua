@@ -1,14 +1,20 @@
 tsab = {}
+tsab.get_time = tsab_get_time
+tsab.get_fps = tsab_get_fps
 tsab.quit = tsab_quit
+
 tsab.update = function() end
 tsab.draw = function() end
 tsab.destroy = function() end
-tsab.error = function() end
+tsab.error = function(error)
+	print("tsab_error: " .. error)
+	tsab.quit()
+end
 
 tsab_init = function() tsab.init() end
 tsab_update = function(dt) tsab.update(dt) end
 tsab_destroy = function() tsab.destroy() end
-tsab_error = function() tsab.error() end
+tsab_error = function(error) tsab.error(error) end
 
 --
 -- input
@@ -142,7 +148,10 @@ tsab.shaders.get_default = function() return default_shader end
 
 function tsab_init()
 	tsab.graphics.new_font("font.ttf", 18)
-	tsab.init()
+
+	if tsab.init then
+		tsab.init()
+	end
 end
 
 function tsab_draw()

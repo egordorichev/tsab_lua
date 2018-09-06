@@ -1,3 +1,11 @@
+/*
+ * tsab
+ * by @egordorichev
+ *
+ * TODO:
+ *  + Fix fps
+ */
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
@@ -33,6 +41,7 @@
 
 static bool running = true;
 static std::string working_dir = "./";
+static int fps;
 
 /*
  * Window config
@@ -67,14 +76,22 @@ static int tsab_quit(lua_State *L) {
 	return 0;
 }
 
+static int tsab_get_time(lua_State *L) {
+	lua_pushnumber(L, ((double) SDL_GetTicks()) / 1000);
+	return 1;
+}
+
+static int tsab_get_fps(lua_State *L) {
+	lua_pushnumber(L, fps);
+	return 1;
+}
+
 static void report_lua_error(lua_State *L) {
 	const char *error = lua_tostring(L, -1);
 
 	lua_getglobal(L, "tsab_error");
 	lua_pushstring(L, error);
 	lua_pcall(L, 1, 0, 0);
-
-	std::cerr << error << "\n";
 }
 
 Uint8 *input_previous_gamepad_button_state;
@@ -943,6 +960,8 @@ int main(int arg, char **argv) {
 	// Register API
 	lua_pushcfunction(L, traceback);
 	// Main API
+	lua_register(L, "tsab_get_time", tsab_get_time);
+	lua_register(L, "tsab_get_fps", tsab_get_fps);
 	lua_register(L, "tsab_quit", tsab_quit);
 	// Input API
 	lua_register(L, "tsab_input_get_mouse_position", tsab_input_get_mouse_position);
@@ -982,7 +1001,6 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_audio_set_sfx_volume", tsab_audio_set_sfx_volume);
 	lua_register(L, "tsab_audio_set_music_volume", tsab_audio_set_music_volume);
 	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);
-
 
 	// Create window
 	screen = GPU_Init(window_width, window_height, pack_window_flags());
@@ -1033,8 +1051,12 @@ int main(int arg, char **argv) {
 	double timer_dt = 0;
 	double timer_fixed_dt = 1.0 / 60.0;
 	double timer_accumulator = 0;
+	int frame;
+	Uint32 start;
 
 	while (running) {
+		start = SDL_GetTicks();
+
 		// Handle input
 		// memcpy(&input_previous_keyboard_state, input_current_keyboard_state, 512);
 
@@ -1054,7 +1076,9 @@ int main(int arg, char **argv) {
 
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
-				case SDL_QUIT: running = false; break;
+				case SDL_QUIT:
+					running = false;
+					break;
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT) input_current_mouse_state[MOUSE_1] = 1;
 					if (event.button.button == SDL_BUTTON_RIGHT) input_current_mouse_state[MOUSE_2] = 1;
@@ -1087,7 +1111,8 @@ int main(int arg, char **argv) {
 						std::cout << "Removed controller\n";
 					}
 					break;
-				default: break;
+				default:
+					break;
 			}
 		}
 
@@ -1135,6 +1160,12 @@ int main(int arg, char **argv) {
 		timer_last = timer_now;
 		timer_now = SDL_GetPerformanceCounter();
 		timer_dt = ((timer_now - timer_last) / (double) SDL_GetPerformanceFrequency());
+
+		if (frame % 40 == 0) {
+			fps = 1000.0 / ((double) (SDL_GetTicks() - start));
+		}
+
+		frame ++;
 	}
 
 	for (int i = 0; i < shaders_separate.size(); i++) {
