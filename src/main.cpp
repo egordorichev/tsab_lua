@@ -67,6 +67,81 @@ struct compare
 
 static std::map<const char *, SDL_Scancode, compare> input_keyboard_map;
 
+static void setup_key_map() {
+	input_keyboard_map["a"] = SDL_SCANCODE_A;
+	input_keyboard_map["b"] = SDL_SCANCODE_B;
+	input_keyboard_map["c"] = SDL_SCANCODE_C;
+	input_keyboard_map["d"] = SDL_SCANCODE_D;
+	input_keyboard_map["e"] = SDL_SCANCODE_E;
+	input_keyboard_map["f"] = SDL_SCANCODE_F;
+	input_keyboard_map["g"] = SDL_SCANCODE_G;
+	input_keyboard_map["h"] = SDL_SCANCODE_H;
+	input_keyboard_map["i"] = SDL_SCANCODE_I;
+	input_keyboard_map["j"] = SDL_SCANCODE_J;
+	input_keyboard_map["k"] = SDL_SCANCODE_K;
+	input_keyboard_map["l"] = SDL_SCANCODE_L;
+	input_keyboard_map["m"] = SDL_SCANCODE_M;
+	input_keyboard_map["n"] = SDL_SCANCODE_N;
+	input_keyboard_map["o"] = SDL_SCANCODE_O;
+	input_keyboard_map["p"] = SDL_SCANCODE_P;
+	input_keyboard_map["q"] = SDL_SCANCODE_Q;
+	input_keyboard_map["r"] = SDL_SCANCODE_R;
+	input_keyboard_map["s"] = SDL_SCANCODE_S;
+	input_keyboard_map["t"] = SDL_SCANCODE_T;
+	input_keyboard_map["u"] = SDL_SCANCODE_U;
+	input_keyboard_map["v"] = SDL_SCANCODE_V;
+	input_keyboard_map["w"] = SDL_SCANCODE_W;
+	input_keyboard_map["x"] = SDL_SCANCODE_X;
+	input_keyboard_map["y"] = SDL_SCANCODE_Y;
+	input_keyboard_map["z"] = SDL_SCANCODE_Z;
+	input_keyboard_map["0"] = SDL_SCANCODE_0;
+	input_keyboard_map["1"] = SDL_SCANCODE_1;
+	input_keyboard_map["2"] = SDL_SCANCODE_2;
+	input_keyboard_map["3"] = SDL_SCANCODE_3;
+	input_keyboard_map["4"] = SDL_SCANCODE_4;
+	input_keyboard_map["5"] = SDL_SCANCODE_5;
+	input_keyboard_map["6"] = SDL_SCANCODE_6;
+	input_keyboard_map["7"] = SDL_SCANCODE_7;
+	input_keyboard_map["8"] = SDL_SCANCODE_8;
+	input_keyboard_map["9"] = SDL_SCANCODE_9;
+	input_keyboard_map["f0"] = SDL_SCANCODE_F1;
+	input_keyboard_map["f1"] = SDL_SCANCODE_F2;
+	input_keyboard_map["f2"] = SDL_SCANCODE_F2;
+	input_keyboard_map["f3"] = SDL_SCANCODE_F3;
+	input_keyboard_map["f4"] = SDL_SCANCODE_F4;
+	input_keyboard_map["f5"] = SDL_SCANCODE_F5;
+	input_keyboard_map["f6"] = SDL_SCANCODE_F6;
+	input_keyboard_map["f7"] = SDL_SCANCODE_F7;
+	input_keyboard_map["f8"] = SDL_SCANCODE_F8;
+	input_keyboard_map["f9"] = SDL_SCANCODE_F9;
+	input_keyboard_map["f10"] = SDL_SCANCODE_F10;
+	input_keyboard_map["f11"] = SDL_SCANCODE_F11;
+	input_keyboard_map["f12"] = SDL_SCANCODE_F12;
+	input_keyboard_map["space"] = SDL_SCANCODE_SPACE;
+	input_keyboard_map["lshift"] = SDL_SCANCODE_LSHIFT;
+	input_keyboard_map["rshift"] = SDL_SCANCODE_RSHIFT;
+	input_keyboard_map["rcontrol"] = SDL_SCANCODE_LCTRL;
+	input_keyboard_map["lcontrol"] = SDL_SCANCODE_RCTRL;
+	input_keyboard_map["lalt"] = SDL_SCANCODE_LALT;
+	input_keyboard_map["ralt"] = SDL_SCANCODE_RALT;
+	input_keyboard_map["capslock"] = SDL_SCANCODE_CAPSLOCK;
+	input_keyboard_map["tab"] = SDL_SCANCODE_TAB;
+	input_keyboard_map["escape"] = SDL_SCANCODE_ESCAPE;
+	input_keyboard_map["delete"] = SDL_SCANCODE_DELETE;
+	input_keyboard_map["backspace"] = SDL_SCANCODE_BACKSPACE;
+	input_keyboard_map["slash"] = SDL_SCANCODE_SLASH;
+	input_keyboard_map["bslash"] = SDL_SCANCODE_BACKSLASH;
+	input_keyboard_map["home"] = SDL_SCANCODE_HOME;
+	input_keyboard_map["end"] = SDL_SCANCODE_END;
+	input_keyboard_map["page_up"] = SDL_SCANCODE_PAGEUP;
+	input_keyboard_map["page_down"] = SDL_SCANCODE_PAGEDOWN;
+	input_keyboard_map["left"] = SDL_SCANCODE_LEFT;
+	input_keyboard_map["right"] = SDL_SCANCODE_RIGHT;
+	input_keyboard_map["up"] = SDL_SCANCODE_UP;
+	input_keyboard_map["down"] = SDL_SCANCODE_DOWN;
+	input_keyboard_map["comma"] = SDL_SCANCODE_COMMA;
+}
+
 static int tsab_input_was_pressed(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
@@ -104,7 +179,7 @@ int main(int, char **) {
 	}
 
 	// Init key map
-	input_keyboard_map["q"] = SDL_SCANCODE_Q;
+	setup_key_map();
 
 	GPU_Target *screen = GPU_Init(window_width, window_height, pack_window_flags());
 
