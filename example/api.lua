@@ -150,3 +150,47 @@ function tsab_draw()
 	tsab.draw()
 	tsab.shaders.set()
 end
+
+--
+-- audio
+--
+
+tsab.audio = {}
+
+tsab.audio.new_sfx = function(...)
+	local sfx = tsab_audio_new_sfx(...)
+
+	return {
+		type = "sfx",
+		pointer = sfx
+	}
+end
+
+tsab.audio.new_music = function(...)
+	local music = tsab_audio_new_music(...)
+
+	return {
+		type = "music",
+		pointer = music
+	}
+end
+
+tsab.audio.play = function(what, loop)
+	if what.type == "music" then
+		tsab_audio_play_music(what.pointer, loop)
+	else
+		tsab_audio_play_sfx(what.pointer)
+	end
+end
+
+tsab.audio.set_volume = function(what, val)
+	if type(what) == "table" then
+		if what.type == "music" then
+			tsab_audio_set_music_volume(val)
+		else
+			tsab_audio_set_sfx_volume(what.pointer, val)
+		end
+	else
+		tsab_audio_set_general_volume(what, val)
+	end
+end

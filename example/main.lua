@@ -9,9 +9,6 @@ function tsab.init()
 	print("hi!")
 	canvas = tsab.graphics.new_canvas(640 / 2, 480 / 2)
 
-	-- tsab_audio_play_music(tsab_audio_new_music("music.mp3"))
-
-	sfx = tsab_audio_new_sfx("sfx.mp3")
 end
 
 function tsab.destroy()
@@ -32,7 +29,7 @@ function tsab.update(dt)
 	time = time + dt
 
 	if tsab.input.was_pressed("space") then
-		tsab_audio_play_sfx(sfx)
+		tsab.audio.play(sfx)
 	end
 end
 

@@ -892,6 +892,33 @@ static int tsab_audio_play_sfx(lua_State *L) {
 	return 0;
 }
 
+static int tsab_audio_set_general_volume(lua_State *L) {
+	double value = luaL_checknumber(L, 1);
+	std::cout << "set volume to " << value << "\n";
+	Mix_Volume(-1, std::min<int>(std::max<int>(0, value * 128), 128));
+
+	return 0;
+}
+
+static int tsab_audio_set_sfx_volume(lua_State *L) {
+	double id = luaL_checknumber(L, 1);
+	double value = luaL_checknumber(L, 2);
+
+	if (id > -1 && id < sfx_list.size()) {
+		Mix_VolumeChunk(sfx_list[id], std::min<int>(std::max<int>(0, value * 128), 128));
+		std::cerr << std::min<int>(std::max<int>(0, value * 128), 128) << std::endl;
+	}
+
+	return 0;
+}
+
+static int tsab_audio_set_music_volume(lua_State *L) {
+	double value = luaL_checknumber(L, 1);
+	Mix_VolumeMusic(std::min<int>(std::max<int>(0, value * 128), 128));
+
+	return 0;
+}
+
 int main(int arg, char **argv) {
 	if (arg >= 2) {
 		working_dir = std::string(argv[1]);
@@ -952,6 +979,9 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_audio_play_music", tsab_audio_play_music);
 	lua_register(L, "tsab_audio_new_sfx", tsab_audio_new_sfx);
 	lua_register(L, "tsab_audio_play_sfx", tsab_audio_play_sfx);
+	lua_register(L, "tsab_audio_set_sfx_volume", tsab_audio_set_sfx_volume);
+	lua_register(L, "tsab_audio_set_music_volume", tsab_audio_set_music_volume);
+	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);
 
 
 	// Create window
