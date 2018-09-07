@@ -7,7 +7,7 @@ function tsab.draw()
 
 	tsab.graphics.set_canvas(canvas)
 	tsab.graphics.clear()
-	tsab.graphics.draw(image, 64, 64, 45, 64, 64)
+	tsab.graphics.draw(image, image.w / 2, image.h / 2, 45, 64, 64)
 	tsab.graphics.print(tsab.get_fps())
 	tsab.graphics.set_canvas()
 	tsab.graphics.draw(canvas, 0, 0, 0, 0, 0, 5, 5)

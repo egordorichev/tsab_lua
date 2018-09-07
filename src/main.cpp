@@ -784,12 +784,26 @@ static int tsab_graphics_print(lua_State *L) {
 }
 
 static int tsab_graphics_get_size(lua_State *L) {
-	int w;
-	int h;
+	int id = check_number(L, 1, -2);
 
-	SDL_GetWindowSize(window, &w, &h);
-	lua_pushnumber(L, w);
-	lua_pushnumber(L, h);
+	if (id == -2) {
+		int w;
+		int h;
+
+		SDL_GetWindowSize(window, &w, &h);
+		lua_pushnumber(L, w);
+		lua_pushnumber(L, h);
+	} else if (id == -1) {
+		lua_pushnumber(L, screen->w);
+		lua_pushnumber(L, screen->h);
+	} else if (id > -1 && id < canvas_list.size()) {
+		GPU_Image *image = canvas_list[id];
+
+		lua_pushnumber(L, image->w);
+		lua_pushnumber(L, image->h);
+	} else {
+		return 0;
+	}
 
 	return 2;
 }

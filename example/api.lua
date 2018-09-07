@@ -103,9 +103,14 @@ tsab.graphics.print = tsab_graphics_print
 tsab.graphics.clear = tsab_graphics_clear
 
 tsab.graphics.new_image = function(...)
+	local img = tsab_graphics_new_image(...)
+	local w, h = tsab_graphics_get_size(img)
+
 	return {
 		type = "image",
-		pointer = tsab_graphics_new_image(...)
+		pointer = img,
+		w = w,
+		h = h
 	}
 end
 
