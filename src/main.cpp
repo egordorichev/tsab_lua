@@ -9,6 +9,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_image.h>
 #include <SDL_GPU/SDL_gpu.h>
 #include <LuaJIT/lua.hpp>
 
@@ -435,6 +436,28 @@ static int tsab_graphics_new_canvas(lua_State *L) {
 
 	GPU_Image *image = GPU_CreateImage(w, h, GPU_FORMAT_RGBA);
 
+	canvas_list.push_back(image);
+
+	GPU_SetImageFilter(image, GPU_FILTER_NEAREST);
+	GPU_LoadTarget(image);
+
+	lua_pushnumber(L, canvas_list.size() - 1);
+
+	return 1;
+}
+
+static int tsab_graphics_new_image(lua_State *L) {
+	const char *name = luaL_checkstring(L, 1);
+
+	SDL_Surface *texture = IMG_Load(name);
+
+	if (texture == nullptr) {
+		lua_pushnumber(L, -1);
+		std::cerr << IMG_GetError() << std::endl;
+		return 1;
+	}
+
+	GPU_Image *image = GPU_CopyImageFromSurface(texture);
 	canvas_list.push_back(image);
 
 	GPU_SetImageFilter(image, GPU_FILTER_NEAREST);
@@ -1069,6 +1092,7 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_new_font", tsab_graphics_new_font);
 	lua_register(L, "tsab_graphics_set_font", tsab_graphics_set_font);
 	lua_register(L, "tsab_graphics_print", tsab_graphics_print);
+	lua_register(L, "tsab_graphics_new_image", tsab_graphics_new_image);
 	// Shaders API
 	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
 	lua_register(L, "tsab_shaders_set", tsab_shaders_set);

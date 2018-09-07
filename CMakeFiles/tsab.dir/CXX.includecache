@@ -13,6 +13,8 @@ SDL2/SDL_ttf.h
 -
 SDL2/SDL_mixer.h
 -
+SDL2/SDL_image.h
+-
 SDL_GPU/SDL_gpu.h
 -
 LuaJIT/lua.hpp

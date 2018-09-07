@@ -102,6 +102,13 @@ tsab.graphics.set_title = tsab_graphics_set_title
 tsab.graphics.print = tsab_graphics_print
 tsab.graphics.clear = tsab_graphics_clear
 
+tsab.graphics.new_image = function(...)
+	return {
+		type = "image",
+		pointer = tsab_graphics_new_image(...)
+	}
+end
+
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
 	if type(x) == "table" then
 		local src_x = x.x or x[1]
