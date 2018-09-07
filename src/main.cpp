@@ -416,34 +416,49 @@ static int tsab_input_was_pressed(lua_State *L) {
 }
 
 static GPU_Target *screen;
+static SDL_Window *window;
 GPU_Image *current_target = nullptr;
 
 static int tsab_graphics_get_default_canvas(lua_State *L) {
-	lua_pushlightuserdata(L, screen);
+	lua_pushnumber(L, -1);
 	lua_pushnumber(L, screen->w);
 	lua_pushnumber(L, screen->h);
 
 	return 3;
 }
 
+static std::vector<GPU_Image *> canvas_list;
+
 static int tsab_graphics_new_canvas(lua_State *L) {
 	double w = luaL_checknumber(L, 1);
 	double h = luaL_checknumber(L, 2);
 
 	GPU_Image *image = GPU_CreateImage(w, h, GPU_FORMAT_RGBA);
+
+	canvas_list.push_back(image);
+
 	GPU_SetImageFilter(image, GPU_FILTER_NEAREST);
 	GPU_LoadTarget(image);
-	lua_pushlightuserdata(L, image);
+
+	lua_pushnumber(L, canvas_list.size() - 1);
 
 	return 1;
 }
 
 static int tsab_graphics_set_canvas(lua_State *L) {
-	current_target = (GPU_Image *) lua_touserdata(L, 1);
+	int id = luaL_checknumber(L, 1);
+
+	if (id > -1 && id < canvas_list.size()) {
+		current_target = canvas_list[id];
+	} else {
+		current_target = nullptr;
+	}
+
 	return 0;
 }
 
 static SDL_Color current_color = { 255, 255, 255, 255 };
+static float bg_color[] = { 0, 0, 0 };
 
 static bool check_bool(lua_State *L, int index, bool default_bool) {
 	if (lua_isboolean( L, index)) {
@@ -469,6 +484,11 @@ static const char *check_string(lua_State *L, int index, const char *default_str
 	return default_str;
 }
 
+static int tsab_graphics_clear(lua_State *L) {
+	GPU_ClearRGB(current_target == nullptr ? screen : current_target->target, bg_color[0], bg_color[1], bg_color[2]);
+	return 0;
+}
+
 static int active_shader = -1;
 
 static int tsab_graphics_draw(lua_State *L) {
@@ -476,49 +496,33 @@ static int tsab_graphics_draw(lua_State *L) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
 	}
 
-	auto *target = (GPU_Target *) lua_touserdata(L, 1);
-	auto *what = (GPU_Image *) lua_touserdata(L, 2);
+	auto *target = current_target == nullptr ? screen : current_target->target;
 
-	double x = luaL_checknumber(L, 3);
-	double y = luaL_checknumber(L, 4);
-	double a = check_number(L, 5, 0);
-	double ox = check_number(L, 6, 0);
-	double oy = check_number(L, 7, 0);
-	double sx = check_number(L, 8, 1);
-	double sy = check_number(L, 9, 1);
-	double src_x = check_number(L, 10, 0);
-	double src_y = check_number(L, 11, 0);
-	double src_w = check_number(L, 12, what->w);
-	double src_h = check_number(L, 13, what->h);
+	GPU_Image *what = nullptr;
+	int id = luaL_checknumber(L, 1);
+
+	if (id > -1 && id < canvas_list.size()) {
+		what = canvas_list[id];
+	}
+
+	if (what == nullptr) {
+		return 0;
+	}
+
+	double x = check_number(L, 2, 0);
+	double y = check_number(L, 3, 0);
+	double a = check_number(L, 4, 0);
+	double ox = check_number(L, 5, 0);
+	double oy = check_number(L, 6, 0);
+	double sx = check_number(L, 7, 1);
+	double sy = check_number(L, 8, 1);
+	double src_x = check_number(L, 9, 0);
+	double src_y = check_number(L, 10, 0);
+	double src_w = check_number(L, 11, what->w);
+	double src_h = check_number(L, 12, what->h);
 
 	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
 	GPU_BlitTransformX(what, &r, target, x, y, ox, oy, a, sx, sy);
-
-	return 0;
-}
-
-static int tsab_graphics_draw_to_texture(lua_State *L) {
-	if (active_shader > -1) {
-		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
-	}
-
-	auto *target = (GPU_Image *) lua_touserdata(L, 1);
-	auto *what = (GPU_Image *) lua_touserdata(L, 2);
-
-	double x = luaL_checknumber(L, 3);
-	double y = luaL_checknumber(L, 4);
-	double a = check_number(L, 5, 0);
-	double ox = check_number(L, 6, 0);
-	double oy = check_number(L, 7, 0);
-	double sx = check_number(L, 8, 1);
-	double sy = check_number(L, 9, 1);
-	double src_x = check_number(L, 10, 0);
-	double src_y = check_number(L, 11, 0);
-	double src_w = check_number(L, 12, what->w);
-	double src_h = check_number(L, 13, what->h);
-
-	GPU_Rect r = GPU_MakeRect(src_x, src_y, src_w, src_h);
-	GPU_BlitTransformX(what, &r, target->target, x, y, ox, oy, a, sx, sy);
 
 	return 0;
 }
@@ -638,6 +642,18 @@ static int clamp(int val, int min, int max) {
 	return std::min(std::max(min, val), max);
 }
 
+static int tsab_graphics_set_clear_color(lua_State *L) {
+	double r = check_number(L, 1, 1);
+	double g = check_number(L, 2, 1);
+	double b = check_number(L, 3, 1);
+
+	bg_color[0] = clamp(r * 255, 0, 255);
+	bg_color[1] = clamp(g * 255, 0, 255);
+	bg_color[2] = clamp(b * 255, 0, 255);
+
+	return 0;
+}
+
 static int tsab_graphics_set_color(lua_State *L) {
 	double r = check_number(L, 1, 1);
 	double g = check_number(L, 2, 1);
@@ -724,45 +740,49 @@ static int tsab_graphics_set_font(lua_State *L) {
 	return 0;
 }
 
-static int tsab_graphics_print_to_texture(lua_State *L) {
-	if (active_shader > -1) {
-		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
-	}
-
-	auto *target = (GPU_Image *) lua_touserdata(L, 1);
-	const char *text = luaL_checkstring(L, 3);
-	double x = check_number(L, 3, 0);
-	double y = check_number(L, 4, 0);
-	double r = check_number(L, 5, 0);
-	double sx = check_number(L, 6, 1);
-	double sy = check_number(L, 7, 1);
-
-	SDL_Surface *surface = TTF_RenderUTF8_Blended(active_font, text, current_color);
-	GPU_Image *image = GPU_CopyImageFromSurface(surface);
-	GPU_BlitTransformX(image, nullptr, target->target, x + image->w/2, y + image->h/2, image->w/2, image->h/2, r, sx, sy);
-	SDL_FreeSurface(surface);
-
-	return 0;
-}
-
 static int tsab_graphics_print(lua_State *L) {
 	if (active_shader > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(shaders[active_shader], "textured"), 1);
 	}
 
-	auto *target = (GPU_Target *) lua_touserdata(L, 1);
-	const char *text = luaL_checkstring(L, 2);
-	double x = check_number(L, 3, 0);
-	double y = check_number(L, 4, 0);
-	double r = check_number(L, 5, 0);
-	double sx = check_number(L, 6, 1);
-	double sy = check_number(L, 7, 1);
+	const char *text = luaL_checkstring(L, 1);
+	double x = check_number(L, 2, 0);
+	double y = check_number(L, 3, 0);
+	double r = check_number(L, 4, 0);
+	double sx = check_number(L, 5, 1);
+	double sy = check_number(L, 6, 1);
 
 	SDL_Surface *surface = TTF_RenderUTF8_Blended(active_font, text, current_color);
 	GPU_Image *image = GPU_CopyImageFromSurface(surface);
-	GPU_BlitTransformX(image, nullptr, target, x + image->w/2, y + image->h/2, image->w/2, image->h/2, r, sx, sy);
+	GPU_BlitTransformX(image, nullptr, current_target == nullptr ? screen : current_target->target, x + image->w/2, y + image->h/2, image->w/2, image->h/2, r, sx, sy);
 	SDL_FreeSurface(surface);
 
+	return 0;
+}
+
+static int tsab_graphics_get_size(lua_State *L) {
+	int w;
+	int h;
+
+	SDL_GetWindowSize(window, &w, &h);
+	lua_pushnumber(L, w);
+	lua_pushnumber(L, h);
+
+	return 2;
+}
+
+static int tsab_graphics_set_size(lua_State *L) {
+	int w = luaL_checknumber(L, 1);
+	int h = luaL_checknumber(L, 2);
+
+	GPU_SetWindowResolution(w, h);
+	return 0;
+}
+
+static int tsab_graphics_set_title(lua_State *L) {
+	const char *title = luaL_checkstring(L, 1);
+
+	SDL_SetWindowTitle(window, title);
 	return 0;
 }
 
@@ -949,20 +969,26 @@ int main(int arg, char **argv) {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	int rv = luaL_dofile(L, "config.lua");
+	lua_pushcfunction(L, traceback);
+	int rv = luaL_loadfile(L, "config.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
 		return rv;
+	} else {
+		if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
+			report_lua_error(L);
+		}
 	}
 
 	lua_getglobal(L, "config");
 	lua_pushstring(L, "window");
 	lua_gettable(L, -2);
 
-
 	int window_width = 640;
 	int window_height = 480;
+	int window_min_width = 0;
+	int window_min_height = 0;
 	bool resizeable;
 	char *window_title;
 
@@ -975,6 +1001,16 @@ int main(int arg, char **argv) {
 		lua_pushstring(L, "height");
 		lua_gettable(L, -2);
 		window_height = check_number(L, -1, window_height);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "min_width");
+		lua_gettable(L, -2);
+		window_min_width = check_number(L, -1, window_min_width);
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "min_height");
+		lua_gettable(L, -2);
+		window_min_height = check_number(L, -1, window_min_height);
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "resizeable");
@@ -1001,7 +1037,6 @@ int main(int arg, char **argv) {
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 
 	// Register API
-	lua_pushcfunction(L, traceback);
 	// Main API
 	lua_register(L, "tsab_get_time", tsab_get_time);
 	lua_register(L, "tsab_get_fps", tsab_get_fps);
@@ -1017,9 +1052,13 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_new_canvas", tsab_graphics_new_canvas);
 	lua_register(L, "tsab_graphics_set_canvas", tsab_graphics_set_canvas);
 	lua_register(L, "tsab_graphics_set_color", tsab_graphics_set_color);
+	lua_register(L, "tsab_graphics_set_clear_color", tsab_graphics_set_clear_color);
+	lua_register(L, "tsab_graphics_clear", tsab_graphics_clear);
 	lua_register(L, "tsab_graphics_get_color", tsab_graphics_get_color);
+	lua_register(L, "tsab_graphics_set_size", tsab_graphics_set_size);
+	lua_register(L, "tsab_graphics_set_title", tsab_graphics_set_title);
+	lua_register(L, "tsab_graphics_get_size", tsab_graphics_get_size);
 	lua_register(L, "tsab_graphics_draw", tsab_graphics_draw);
-	lua_register(L, "tsab_graphics_draw_to_texture", tsab_graphics_draw_to_texture);
 	lua_register(L, "tsab_graphics_circle", tsab_graphics_circle);
 	lua_register(L, "tsab_graphics_rectangle", tsab_graphics_rectangle);
 	lua_register(L, "tsab_graphics_point", tsab_graphics_point);
@@ -1030,7 +1069,6 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_graphics_new_font", tsab_graphics_new_font);
 	lua_register(L, "tsab_graphics_set_font", tsab_graphics_set_font);
 	lua_register(L, "tsab_graphics_print", tsab_graphics_print);
-	lua_register(L, "tsab_graphics_print_to_texture", tsab_graphics_print_to_texture);
 	// Shaders API
 	lua_register(L, "tsab_shaders_new", tsab_shaders_new);
 	lua_register(L, "tsab_shaders_set", tsab_shaders_set);
@@ -1046,39 +1084,49 @@ int main(int arg, char **argv) {
 	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);
 
 	// Create window
-	int flags = SDL_WINDOW_SHOWN;
+	int flags = 0;
 
 	if (resizeable) {
 		flags |= SDL_WINDOW_RESIZABLE;
 	}
 
-	SDL_Window *window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
+	window = SDL_CreateWindow(window_title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, flags);
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	GPU_SetInitWindow(SDL_GetWindowID(window));
+	SDL_SetWindowMinimumSize(window, window_min_width, window_min_height);
 	screen = GPU_Init(window_width, window_height, GPU_DEFAULT_INIT_FLAGS);
-	GPU_Clear(screen);
+	GPU_ClearRGB(screen, bg_color[0], bg_color[1], bg_color[2]);
 
 	// Do the api file
-	rv = luaL_dofile(L, "api.lua");
+	lua_pushcfunction(L, traceback);
+	rv = luaL_loadfile(L, "api.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
 		return rv;
+	} else {
+		if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
+			report_lua_error(L);
+		}
 	}
 
 	// Do the main file
+	lua_pushcfunction(L, traceback);
 	rv = luaL_loadfile(L, "main.lua");
 
 	if (rv) {
 		std::cerr << lua_tostring(L, -1) << std::endl;
 		return rv;
 	} else {
-		lua_pcall(L, 0, 0, lua_gettop(L) - 1);
+		if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
+			report_lua_error(L);
+		}
 	}
 
 	// Init key map
 	setup_key_map();
 	// Call init
+	lua_pushcfunction(L, traceback);
 	lua_getglobal(L, "tsab_init");
 
 	if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
@@ -1105,6 +1153,10 @@ int main(int arg, char **argv) {
 	double timer_accumulator = 0;
 	int frame;
 	Uint32 start;
+	int w;
+	int h;
+
+	SDL_ShowWindow(window);
 
 	while (running) {
 		start = SDL_GetTicks();
@@ -1130,6 +1182,25 @@ int main(int arg, char **argv) {
 			switch (event.type) {
 				case SDL_QUIT:
 					running = false;
+					break;
+				case SDL_WINDOWEVENT:
+					switch (event.window.event) {
+						case SDL_WINDOWEVENT_RESIZED:
+							lua_pushcfunction(L, traceback);
+							lua_getglobal(L, "tsab_resize");
+
+							SDL_GetWindowSize(window, &w, &h);
+							GPU_SetWindowResolution(w, h);
+
+							lua_pushnumber(L, w);
+							lua_pushnumber(L, h);
+
+							if (lua_pcall(L, 2, 0, lua_gettop(L) - 3) != 0) {
+								report_lua_error(L);
+							}
+
+							break;
+					}
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					if (event.button.button == SDL_BUTTON_LEFT) input_current_mouse_state[MOUSE_1] = 1;
@@ -1196,7 +1267,7 @@ int main(int arg, char **argv) {
 			timer_accumulator -= timer_fixed_dt;
 		}
 
-		GPU_Clear(screen);
+		GPU_ClearRGB(screen, bg_color[0], bg_color[1], bg_color[2]);
 
 		// Call draw
 		lua_pushcfunction(L, traceback);
@@ -1219,6 +1290,11 @@ int main(int arg, char **argv) {
 
 		frame ++;
 	}
+
+	for (int i = 0; i < canvas_list.size(); i++) {
+		GPU_FreeImage(canvas_list[i]);
+	}
+
 
 	for (int i = 0; i < shaders_separate.size(); i++) {
 		GPU_FreeShader(shaders_separate[i]);

@@ -6,6 +6,8 @@ tsab.quit = tsab_quit
 tsab.update = function() end
 tsab.draw = function() end
 tsab.destroy = function() end
+tsab.resize = function(w, h) end
+
 tsab.error = function(error)
 	print("tsab_error: " .. error)
 	tsab.quit()
@@ -15,6 +17,7 @@ tsab_init = function() tsab.init() end
 tsab_update = function(dt) tsab.update(dt) end
 tsab_destroy = function() tsab.destroy() end
 tsab_error = function(error) tsab.error(error) end
+tsab_resize = function(...) tsab.resize(...) end
 
 --
 -- input
@@ -55,10 +58,10 @@ tsab.graphics.get_canvas = function() return tsab_active_canvas end
 tsab.graphics.set_canvas = function(canvas)
 	tsab_active_canvas = canvas or tsab_default_canvas
 
-	if canvas then
+	if type(canvas) == "table" then
 		tsab_graphics_set_canvas(canvas.pointer)
 	else
-		tsab_graphics_set_canvas(nil)
+		tsab_graphics_set_canvas(-1)
 	end
 end
 
@@ -72,6 +75,7 @@ tsab.graphics.new_canvas = function(w, h)
 end
 
 local active_shader
+
 tsab.graphics.color = function(r, g, b, a)
 	tsab_graphics_set_color(r, g, b, a)
 
@@ -79,6 +83,8 @@ tsab.graphics.color = function(r, g, b, a)
 		tsab_shaders_send_vec4(active_shader, "color", r or 1, g or 1, b or 1, a or 1)
 	end
 end
+
+tsab.graphics.background_color = tsab_graphics_set_clear_color
 
 tsab.graphics.get_color = tsab_graphics_get_color
 tsab.graphics.circle = tsab_graphics_circle
@@ -90,38 +96,22 @@ tsab.graphics.triangle = tsab_graphics_triangle
 tsab.graphics.camera = tsab_graphics_camera
 tsab.graphics.new_font = tsab_graphics_new_font
 tsab.graphics.set_font = tsab_graphics_set_font
-
-tsab.graphics.print = function(str, x, y, r, sx, sy)
-	if tsab_active_canvas.screen then
-		tsab_graphics_print(tsab_active_canvas.pointer, str, x, y, r, sx, sy)
-	else
-		tsab_graphics_print_to_texture(tsab_active_canvas.pointer, str, x, y, r, sx, sy)
-	end
-end
+tsab.graphics.get_size = tsab_graphics_get_size
+tsab.graphics.set_size = tsab_graphics_set_size
+tsab.graphics.set_title = tsab_graphics_set_title
+tsab.graphics.print = tsab_graphics_print
+tsab.graphics.clear = tsab_graphics_clear
 
 tsab.graphics.draw = function(what, x, y, a, ox, oy, sx, sy, e)
-	if tsab_active_canvas.screen then
-		if type(x) == "table" then
-			local src_x = x.x or x[1]
-			local src_y = x.y or x[2]
-			local src_w = x.w or x[3]
-			local src_h = x.h or x[4]
+	if type(x) == "table" then
+		local src_x = x.x or x[1]
+		local src_y = x.y or x[2]
+		local src_w = x.w or x[3]
+		local src_h = x.h or x[4]
 
-			tsab_graphics_draw(tsab_active_canvas.pointer, what.pointer, y, a, ox, oy, sx, sy, e, src_x, src_y, src_w, src_h)
-		else
-			tsab_graphics_draw(tsab_active_canvas.pointer, what.pointer, x, y, a, ox, oy, sx, sy, 0, 0, what.w, what.h)
-		end
+		tsab_graphics_draw(what.pointer, y, a, ox, oy, sx, sy, e, src_x, src_y, src_w, src_h)
 	else
-		if type(x) == "table" then
-			local src_x = x.x or x[1]
-			local src_y = x.y or x[2]
-			local src_w = x.w or x[3]
-			local src_h = x.h or x[4]
-
-			tsab_graphics_draw_to_texture(tsab_active_canvas.pointer, what.pointer, y, a, ox, oy, sx, sy, e, src_x, src_y, src_w, src_h)
-		else
-			tsab_graphics_draw_to_texture(tsab_active_canvas.pointer, what.pointer, x, y, a, ox, oy, sx, sy)
-		end
+		tsab_graphics_draw(what.pointer, x, y, a, ox, oy, sx, sy, 0, 0, what.w, what.h)
 	end
 end
 
