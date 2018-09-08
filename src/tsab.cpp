@@ -6,10 +6,10 @@
  *  + Fix fps
  */
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
+// #include <SDL_mixer.h>
+#include <SDL_image.h>
 #include <SDL_GPU/SDL_gpu.h>
 #include <LuaJIT/lua.hpp>
 
@@ -106,7 +106,7 @@ struct compare
 static std::map<const char *, int, compare> input_keyboard_map;
 
 static void setup_key_map() {
-	input_keyboard_map["a"] = SDL_SCANCODE_A;
+	/*input_keyboard_map["a"] = SDL_SCANCODE_A;
 	input_keyboard_map["b"] = SDL_SCANCODE_B;
 	input_keyboard_map["c"] = SDL_SCANCODE_C;
 	input_keyboard_map["d"] = SDL_SCANCODE_D;
@@ -209,7 +209,7 @@ static void setup_key_map() {
 	input_keyboard_map["lx"] = SDL_CONTROLLER_AXIS_RIGHTX;
 	input_keyboard_map["ry"] = SDL_CONTROLLER_AXIS_RIGHTY;
 	input_keyboard_map["ltrigger"] = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
-	input_keyboard_map["rtrigger"] = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
+	input_keyboard_map["rtrigger"] = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;*/
 }
 
 static int tsab_input_get_axis(lua_State *L) {
@@ -219,14 +219,14 @@ static int tsab_input_get_axis(lua_State *L) {
 	}
 
 	const char *axis = luaL_checkstring(L, 1);
-	auto it = input_keyboard_map.find(axis);
+	/*auto it = input_keyboard_map.find(axis);
 
 	if (it != input_keyboard_map.end()) {
 		lua_pushnumber(L, std::max<double>(-1, ((double) input_gamepad_axis_state[it->second]) / 32767));
 	} else {
 		std::cout << "No such axis " << axis << std::endl;
 		lua_pushboolean(L, 0); // Axis not found
-	}
+	}*/
 
 	return 1;
 }
@@ -246,7 +246,7 @@ static int tsab_input_get_mouse_position(lua_State *L) {
 static int tsab_input_was_released(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
-	if (strstr(key, "controller") != nullptr) {
+	/*if (strstr(key, "controller") != nullptr) {
 		if (controller == nullptr) {
 			lua_pushboolean(L, 0); // No controller
 			return 1;
@@ -296,7 +296,7 @@ static int tsab_input_was_released(lua_State *L) {
 			std::cout << "No such key " << key << std::endl;
 			lua_pushboolean(L, 0); // Key not found
 		}
-	}
+	}*/
 
 	return 1;
 }
@@ -304,7 +304,7 @@ static int tsab_input_was_released(lua_State *L) {
 static int tsab_input_is_down(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
-	if (strstr(key, "controller") != nullptr) {
+	/*if (strstr(key, "controller") != nullptr) {
 		if (controller == nullptr) {
 			lua_pushboolean(L, 0); // No controller
 			return 1;
@@ -354,7 +354,7 @@ static int tsab_input_is_down(lua_State *L) {
 			std::cout << "No such key " << key << std::endl;
 			lua_pushboolean(L, 0); // Key not found
 		}
-	}
+	}*/
 
 	return 1;
 }
@@ -362,7 +362,7 @@ static int tsab_input_is_down(lua_State *L) {
 static int tsab_input_was_pressed(lua_State *L) {
 	const char *key = luaL_checkstring(L, 1);
 
-	if (strstr(key, "controller") != nullptr) {
+	/*if (strstr(key, "controller") != nullptr) {
 		if (controller == nullptr) {
 			lua_pushboolean(L, 0); // No controller
 			return 1;
@@ -412,7 +412,7 @@ static int tsab_input_was_pressed(lua_State *L) {
 			std::cout << "No such key " << key << std::endl;
 			lua_pushboolean(L, 0); // Key not found
 		}
-	}
+	}*/
 
 	return 1;
 }
@@ -905,6 +905,7 @@ static int tsab_shaders_send_vec4(lua_State *L) {
  * Audio
  */
 
+/*
 static std::vector<Mix_Music *> music_list;
 static std::vector<Mix_Chunk *> sfx_list;
 
@@ -990,7 +991,7 @@ static int tsab_audio_set_music_volume(lua_State *L) {
 	Mix_VolumeMusic(std::min<int>(std::max<int>(0, value * 128), 128));
 
 	return 0;
-}
+}*/
 
 SDL_Renderer *renderer;
 lua_State *L;
@@ -1074,7 +1075,7 @@ int tsab_init(int arg, char **argv) {
 	GPU_SetRequiredFeatures(GPU_FEATURE_BASIC_SHADERS);
 	SDL_Init(SDL_INIT_EVERYTHING);
 	TTF_Init();
-	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+	// Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 
 	// Register API
@@ -1117,13 +1118,13 @@ int tsab_init(int arg, char **argv) {
 	lua_register(L, "tsab_shaders_send_float", tsab_shaders_send_float);
 	lua_register(L, "tsab_shaders_send_vec4", tsab_shaders_send_vec4);
 	// Audio API
-	lua_register(L, "tsab_audio_new_music", tsab_audio_new_music);
+	/*lua_register(L, "tsab_audio_new_music", tsab_audio_new_music);
 	lua_register(L, "tsab_audio_play_music", tsab_audio_play_music);
 	lua_register(L, "tsab_audio_new_sfx", tsab_audio_new_sfx);
 	lua_register(L, "tsab_audio_play_sfx", tsab_audio_play_sfx);
 	lua_register(L, "tsab_audio_set_sfx_volume", tsab_audio_set_sfx_volume);
 	lua_register(L, "tsab_audio_set_music_volume", tsab_audio_set_music_volume);
-	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);
+	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);*/
 
 	// Create window
 	int flags = 0;
@@ -1208,7 +1209,7 @@ void tsab_loop() {
 	}
 }
 
-void tsab_loop_step() {
+bool tsab_loop_step() {
 	start = SDL_GetTicks();
 
 	// Handle input
@@ -1339,6 +1340,7 @@ void tsab_loop_step() {
 	}
 
 	frame ++;
+	return !running;
 }
 
 void tsab_quit() {
@@ -1354,15 +1356,15 @@ void tsab_quit() {
 		GPU_FreeShaderProgram(shaders[i]);
 	}
 
-	for (int i = 0; i < music_list.size(); i++) {
+	/*for (int i = 0; i < music_list.size(); i++) {
 		Mix_FreeMusic(music_list[i]);
-	}
+	}*/
 
 	delete input_previous_mouse_state;
 	delete input_current_mouse_state;
 	delete input_previous_keyboard_state;
 
-	Mix_CloseAudio();
+	// Mix_CloseAudio();
 	TTF_Quit();
 	GPU_Quit();
 	SDL_DestroyRenderer(renderer);
