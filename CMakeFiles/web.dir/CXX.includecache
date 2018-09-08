@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/egor/tsab/web/web.cpp
+tsab.hpp
+/home/egor/tsab/web/tsab.hpp
+emscripten.h
+-
+
+src/tsab.hpp
+

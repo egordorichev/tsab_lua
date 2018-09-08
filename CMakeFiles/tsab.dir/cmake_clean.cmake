@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/tsab.dir/src/main.cpp.o"
+  "CMakeFiles/tsab.dir/src/tsab.cpp.o"
   "tsab.pdb"
   "tsab"
 )

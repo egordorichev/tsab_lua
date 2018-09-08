@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6"/>
 	<Project>
-		<Option title="tsab"/>
+		<Option title="web"/>
 		<Option makefile_is_custom="1"/>
 		<Option compiler="gcc"/>
 		<Option virtualFolders="CMake Files\;CMake Files\cmake\;"/>
@@ -37,8 +37,8 @@
 					<DistClean command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="tsab">
-				<Option output="/home/egor/tsab/tsab" prefix_auto="0" extension_auto="0"/>
+			<Target title="web">
+				<Option output="/home/egor/tsab/web.html" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/egor/tsab"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -50,14 +50,14 @@
 					<Add directory="/usr/include/luajit-2.0"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 tsab"/>
+					<Build command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 web"/>
 					<CompileFile command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
-			<Target title="tsab/fast">
-				<Option output="/home/egor/tsab/tsab" prefix_auto="0" extension_auto="0"/>
+			<Target title="web/fast">
+				<Option output="/home/egor/tsab/web.html" prefix_auto="0" extension_auto="0"/>
 				<Option working_dir="/home/egor/tsab"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
@@ -69,21 +69,15 @@
 					<Add directory="/usr/include/luajit-2.0"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 tsab/fast"/>
+					<Build command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 web/fast"/>
 					<CompileFile command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
 					<Clean command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 clean"/>
 					<DistClean command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/egor/tsab/src/main.cpp">
-			<Option target="tsab"/>
-		</Unit>
-		<Unit filename="/home/egor/tsab/src/tsab.cpp">
-			<Option target="tsab"/>
-		</Unit>
-		<Unit filename="/home/egor/tsab/src/tsab.hpp">
-			<Option target="tsab"/>
+		<Unit filename="/home/egor/tsab/web/web.cpp">
+			<Option target="web"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>

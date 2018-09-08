@@ -150,6 +150,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/tsab.o: src/tsab.cpp.o
+
+.PHONY : src/tsab.o
+
+# target to build an object file
+src/tsab.cpp.o:
+	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/tsab.cpp.o
+.PHONY : src/tsab.cpp.o
+
+src/tsab.i: src/tsab.cpp.i
+
+.PHONY : src/tsab.i
+
+# target to preprocess a source file
+src/tsab.cpp.i:
+	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/tsab.cpp.i
+.PHONY : src/tsab.cpp.i
+
+src/tsab.s: src/tsab.cpp.s
+
+.PHONY : src/tsab.s
+
+# target to generate assembly for a file
+src/tsab.cpp.s:
+	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/tsab.cpp.s
+.PHONY : src/tsab.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,6 +189,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/tsab.o"
+	@echo "... src/tsab.i"
+	@echo "... src/tsab.s"
 .PHONY : help
 
 

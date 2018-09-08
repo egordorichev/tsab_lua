@@ -4,8 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/egor/tsab/src/main.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/main.cpp.o"
-  "/home/egor/tsab/src/tsab.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/tsab.cpp.o"
+  "/home/egor/tsab/web/web.cpp" "/home/egor/tsab/CMakeFiles/web.dir/web/web.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
