@@ -6,7 +6,13 @@ local player = require "player"
 
 function ingame:init()
 	self.area = area()
-	self.area:add(player())
+
+	local plr = player()
+
+	plr.x = 64
+	plr.y = 64
+
+	self.area:add(plr)
 end
 
 function ingame:destroy()

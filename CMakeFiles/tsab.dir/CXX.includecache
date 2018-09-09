@@ -1,10 +1,14 @@
-#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
 
 #IncludeRegexScan: ^.*$
 
 #IncludeRegexComplain: ^$
 
 #IncludeRegexTransform: 
+
+/home/egor/tsab/src/main.cpp
+tsab.hpp
+/home/egor/tsab/src/tsab.hpp
 
 /home/egor/tsab/src/tsab.cpp
 SDL.h
@@ -69,14 +73,14 @@ SDL_events.h
 /usr/include/SDL2/SDL_events.h
 SDL_filesystem.h
 /usr/include/SDL2/SDL_filesystem.h
+SDL_joystick.h
+/usr/include/SDL2/SDL_joystick.h
 SDL_gamecontroller.h
 /usr/include/SDL2/SDL_gamecontroller.h
 SDL_haptic.h
 /usr/include/SDL2/SDL_haptic.h
 SDL_hints.h
 /usr/include/SDL2/SDL_hints.h
-SDL_joystick.h
-/usr/include/SDL2/SDL_joystick.h
 SDL_loadso.h
 /usr/include/SDL2/SDL_loadso.h
 SDL_log.h
@@ -91,8 +95,6 @@ SDL_render.h
 /usr/include/SDL2/SDL_render.h
 SDL_rwops.h
 /usr/include/SDL2/SDL_rwops.h
-SDL_shape.h
-/usr/include/SDL2/SDL_shape.h
 SDL_system.h
 /usr/include/SDL2/SDL_system.h
 SDL_thread.h
@@ -175,17 +177,13 @@ intrin.h
 -
 altivec.h
 -
-mm3dnow.h
--
-immintrin.h
--
 mmintrin.h
+-
+mm3dnow.h
 -
 xmmintrin.h
 -
 emmintrin.h
--
-pmmintrin.h
 -
 begin_code.h
 /usr/include/SDL2/begin_code.h
@@ -368,22 +366,6 @@ begin_code.h
 close_code.h
 /usr/include/SDL2/close_code.h
 
-/usr/include/SDL2/SDL_mixer.h
-SDL_stdinc.h
-/usr/include/SDL2/SDL_stdinc.h
-SDL_rwops.h
-/usr/include/SDL2/SDL_rwops.h
-SDL_audio.h
-/usr/include/SDL2/SDL_audio.h
-SDL_endian.h
-/usr/include/SDL2/SDL_endian.h
-SDL_version.h
-/usr/include/SDL2/SDL_version.h
-begin_code.h
-/usr/include/SDL2/begin_code.h
-close_code.h
-/usr/include/SDL2/close_code.h
-
 /usr/include/SDL2/SDL_mouse.h
 SDL_stdinc.h
 /usr/include/SDL2/SDL_stdinc.h
@@ -409,8 +391,6 @@ close_code.h
 /usr/include/SDL2/SDL_pixels.h
 SDL_stdinc.h
 /usr/include/SDL2/SDL_stdinc.h
-SDL_endian.h
-/usr/include/SDL2/SDL_endian.h
 begin_code.h
 /usr/include/SDL2/begin_code.h
 close_code.h
@@ -482,22 +462,6 @@ close_code.h
 SDL_stdinc.h
 /usr/include/SDL2/SDL_stdinc.h
 
-/usr/include/SDL2/SDL_shape.h
-SDL_stdinc.h
-/usr/include/SDL2/SDL_stdinc.h
-SDL_pixels.h
-/usr/include/SDL2/SDL_pixels.h
-SDL_rect.h
-/usr/include/SDL2/SDL_rect.h
-SDL_surface.h
-/usr/include/SDL2/SDL_surface.h
-SDL_video.h
-/usr/include/SDL2/SDL_video.h
-begin_code.h
-/usr/include/SDL2/begin_code.h
-close_code.h
-/usr/include/SDL2/close_code.h
-
 /usr/include/SDL2/SDL_stdinc.h
 SDL_config.h
 /usr/include/SDL2/SDL_config.h
@@ -525,8 +489,6 @@ string.h
 -
 strings.h
 -
-wchar.h
--
 inttypes.h
 -
 stdint.h
@@ -536,6 +498,8 @@ ctype.h
 math.h
 -
 float.h
+-
+iconv.h
 -
 sal.h
 -
@@ -596,10 +560,6 @@ SDL_mutex.h
 begin_code.h
 /usr/include/SDL2/begin_code.h
 process.h
--
-process.h
--
-stdlib.h
 -
 close_code.h
 /usr/include/SDL2/close_code.h

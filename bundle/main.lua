@@ -15,6 +15,13 @@ local canvas_y
 local canvas_scale
 
 function tsab.init()
+	input = require "l2.input" ({
+		left = { "left", "a" },
+		right = { "right", "d" },
+		up = { "up", "w" },
+		down = { "down", "s" }
+	})
+
 	canvas = tsab.graphics.new_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
 	tsab.resize(tsab.graphics.get_size())
 
