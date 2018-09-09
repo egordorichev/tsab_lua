@@ -279,3 +279,15 @@ tsab.physics.set_body_transform = tsab_physics_set_body_transform
 tsab.physics.get_body_transform = tsab_physics_get_body_transform
 tsab.physics.set_body_velocity = tsab_physics_set_body_velocity
 tsab.physics.get_body_velocity =  tsab_physics_get_body_velocity
+
+--
+-- ui
+--
+
+tsab.ui = {}
+tsab.ui.frame = tsab_ui_frame
+tsab.ui.button = tsab_ui_button
+tsab.ui.text_input = tsab_ui_text_input
+tsab.ui.render = tsab_ui_render
+tsab.ui.begin = tsab_ui_begin
+tsab.ui.finish = tsab_ui_end

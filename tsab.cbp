@@ -46,6 +46,7 @@
 				<Compiler>
 					<Add directory="/home/egor/tsab/include"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
+					<Add directory="/home/egor/tsab/libs"/>
 					<Add directory="/usr/include/SDL2"/>
 				</Compiler>
 				<MakeCommands>
@@ -64,6 +65,7 @@
 				<Compiler>
 					<Add directory="/home/egor/tsab/include"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
+					<Add directory="/home/egor/tsab/libs"/>
 					<Add directory="/usr/include/SDL2"/>
 				</Compiler>
 				<MakeCommands>
@@ -74,6 +76,30 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui.cpp">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui.h">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui_draw.cpp">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui_impl_opengl3.cpp">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui_impl_opengl3.h">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui_impl_sdl.cpp">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui_impl_sdl.h">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/libs/ImGui/imgui_widgets.cpp">
+			<Option target="tsab"/>
+		</Unit>
 		<Unit filename="/home/egor/tsab/src/audio.cpp">
 			<Option target="tsab"/>
 		</Unit>
@@ -99,6 +125,9 @@
 			<Option target="tsab"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/src/tsab.cpp">
+			<Option target="tsab"/>
+		</Unit>
+		<Unit filename="/home/egor/tsab/src/ui.cpp">
 			<Option target="tsab"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/CMakeLists.txt">

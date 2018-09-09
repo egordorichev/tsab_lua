@@ -25,6 +25,7 @@
 #include "shaders.hpp"
 #include "graphics.hpp"
 #include "physics.hpp"
+#include "ui.hpp"
 #include "lua.hpp"
 
 /*
@@ -151,6 +152,7 @@ int tsab_init(int arg, char **argv) {
 	tsab_graphics_init(window_width, window_height, window_min_width, window_min_height, window_title, flags);
 	tsab_audio_init();
 	tsab_input_init();
+	tsab_ui_init();
 
 	// Register API
 	lua_register(L, "tsab_get_time", tsab_get_time);
@@ -163,6 +165,7 @@ int tsab_init(int arg, char **argv) {
 	tsab_audio_register_api(L);
 	tsab_fs_register_api(L);
 	tsab_physics_register_api(L);
+	tsab_ui_register_api(L);
 
 	// Do the api file
 	lua_pushcfunction(L, traceback);
@@ -225,7 +228,8 @@ bool tsab_loop_step() {
 	
 	while (SDL_PollEvent(&event)) {
 		tsab_input_handle_event(&event);
-		
+		tsab_ui_handle_event(&event);
+
 		switch (event.type) {
 			case SDL_QUIT:
 				running = false;
@@ -296,6 +300,7 @@ void tsab_quit() {
 	tsab_shaders_quit();
 	tsab_audio_quit();
 	tsab_input_quit();
+	tsab_ui_quit();
 	tsab_graphics_quit();
 
 	// Call destroy

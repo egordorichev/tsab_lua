@@ -50,6 +50,18 @@ function tsab.draw()
 	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)
 	tsab.graphics.color(0, 255, 0)
 	tsab.graphics.print(math.floor(tsab.get_fps()))
+
+	tsab.ui.frame()
+
+	tsab.ui.begin("Debug")
+	if tsab.ui.button("Quit") then
+		tsab.quit()
+	end
+
+	tsab.ui.text_input("Halp")
+	tsab.ui.finish()
+
+	tsab.ui.render()
 end
 
 function tsab.resize(w, h)

@@ -4,10 +4,11 @@ project(tsab)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 set(CMAKE_CXX_STANDARD 14)
 
-file(GLOB_RECURSE SOURCE_FILES src/main.cpp src/tsab.cpp src/lua.cpp src/audio.cpp src/graphics.cpp src/shaders.cpp src/fs.cpp src/input.cpp src/physics.cpp)
+file(GLOB_RECURSE SOURCE_FILES src/main.cpp src/tsab.cpp src/lua.cpp src/audio.cpp src/graphics.cpp src/shaders.cpp src/fs.cpp src/input.cpp src/physics.cpp src/ui.cpp
+        libs/ImGui/imgui.cpp libs/ImGui/imgui_widgets.cpp libs/ImGui/imgui_draw.cpp libs/ImGui/imgui_impl_sdl.cpp libs/ImGui/imgui_impl_opengl3.cpp)
 add_executable(tsab ${SOURCE_FILES})
 
-include_directories(include/ libs/include/)
+include_directories(include/ libs/include/ libs/)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fPIC")
 
 find_package(SDL2 REQUIRED)
