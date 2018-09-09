@@ -14,7 +14,7 @@ void tsab_graphics_quit();
 void tsab_graphics_register_api(lua_State *L);
 void tsab_graphics_resize(int *w, int *h);
 void tsab_graphics_clear_screen();
-
+GPU_Target *tsab_graphics_get_current_target();
 
 int tsab_graphics_flip(lua_State *L);
 int tsab_graphics_get_default_canvas(lua_State *L);

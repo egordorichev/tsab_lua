@@ -2,10 +2,16 @@ local point = require "l2.point"
 local rect = point:extend()
 
 function rect:new(x, y, w, h)
-	rect.super.new(self, x, y)
+	self:set(x, y, w, h)
+end
 
-	self.w = w or 0
-	self.h = h or w or 0
+function rect:set(x, y, w, h)
+	rect.super.set(self, x, y)
+
+	if w and h then
+		self.w = w
+		self.h = h
+	end
 end
 
 function rect:contains(px, py)

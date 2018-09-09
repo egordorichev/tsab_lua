@@ -182,6 +182,10 @@ int tsab_graphics_draw(lua_State *L) {
 	return 0;
 }
 
+GPU_Target *tsab_graphics_get_current_target() {
+	return current_target == nullptr ? screen : current_target->target;
+}
+
 int tsab_graphics_circle(lua_State *L) {
 	if (tsab_shaders_get_active() > -1) {
 		GPU_SetUniformf(GPU_GetUniformLocation(tsab_shaders_get_active_shader(), "textured"), 0);

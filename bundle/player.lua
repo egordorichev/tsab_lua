@@ -7,10 +7,22 @@ function player:init()
 
 	self.vel = point()
 	self.speed = 40
+	self.body = tsab.physics.new_body("dynamic", {
+		shape = "rect",
+		w = 16,
+		h = 16
+	})
+end
+
+function player:destroy()
+	self.body:destroy()
 end
 
 function player:update(dt)
 	player.super.update(self, dt)
+
+	self:set(self.body:get_transform())
+	self.vel:set(self.body:get_velocity())
 
 	if input:is_down("left") then
 		self.vel.x = self.vel.x - self.speed
@@ -20,17 +32,14 @@ function player:update(dt)
 		self.vel.x = self.vel.x + self.speed
 	end
 
-	self.x = self.x + self.vel.x * dt
-	self.y = self.y + self.vel.y * dt
-
 	local vdt = dt * 60 * 0.7
 
 	self.vel.x = self.vel.x * vdt
-	self.vel.y = self.vel.y * vdt
+	self.body:set_velocity(self.vel.x, self.vel.y)
 end
 
 function player:draw()
-	tsab.graphics.color(0.5, 1, 0.5, 1)
+	tsab.graphics.color(0.5, 0.5, 0.5, 1)
 	tsab.graphics.rectangle(self.x, self.y, self.w, self.h)
 end
 

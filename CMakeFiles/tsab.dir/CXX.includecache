@@ -61,6 +61,10 @@ physics.hpp
 /home/egor/tsab/src/physics.hpp
 tsab.hpp
 /home/egor/tsab/src/tsab.hpp
+graphics.hpp
+/home/egor/tsab/src/graphics.hpp
+shaders.hpp
+/home/egor/tsab/src/shaders.hpp
 vector
 -
 iostream

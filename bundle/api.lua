@@ -89,7 +89,7 @@ tsab.graphics.background_color = tsab_graphics_set_clear_color
 tsab.graphics.get_color = tsab_graphics_get_color
 tsab.graphics.circle = tsab_graphics_circle
 tsab.graphics.rectangle = tsab_graphics_rectangle
-tsab.graphics.point = tsab_graphics_point
+tsab.graphics.po= tsab_graphics_point
 tsab.graphics.line = tsab_graphics_line
 tsab.graphics.ellipse = tsab_graphics_ellipse
 tsab.graphics.triangle = tsab_graphics_triangle
@@ -225,9 +225,57 @@ end
 
 --
 -- filesystem
----
+--
 
 tsab.fs = {}
 tsab.fs.get_directory_files = tsab_fs_get_directory_files
 tsab.fs.is_directory = tsab_fs_is_directory
 tsab.fs.get_last_modified = tsab_fs_get_last_modified
+
+--
+-- physics
+--
+
+tsab.physics = {}
+tsab.physics.new_world = tsab_physics_new_world
+tsab.physics.destroy_world = tsab_physics_destroy_world
+tsab.physics.update = tsab_physics_update
+tsab.physics.draw = tsab_physics_draw
+
+local object = require "lib.classic"
+local body = object:extend()
+
+function body:new(pointer)
+	self.pointer = pointer
+end
+
+function body:destroy()
+	tsab_physics_destroy_body(self.pointer)
+	self.pointer = -1
+end
+
+function body:set_transform(...)
+	tsab_physics_set_body_transform(self.pointer, ...)
+end
+
+function body:get_transform()
+	return tsab_physics_get_body_transform(self.pointer)
+end
+
+function body:set_velocity(...)
+	tsab_physics_set_body_velocity(self.pointer, ...)
+end
+
+function body:get_velocity()
+	return tsab_physics_get_body_velocity(self.pointer)
+end
+
+tsab.physics.new_body = function(...)
+	return body(tsab_physics_new_body(...))
+end
+
+tsab.physics.destroy_body = tsab_physics_destroy_body
+tsab.physics.set_body_transform = tsab_physics_set_body_transform
+tsab.physics.get_body_transform = tsab_physics_get_body_transform
+tsab.physics.set_body_velocity = tsab_physics_set_body_velocity
+tsab.physics.get_body_velocity =  tsab_physics_get_body_velocity

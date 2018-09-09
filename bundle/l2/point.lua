@@ -1,6 +1,10 @@
 local point = object:extend()
 
 function point:new(x, y)
+	self:set(x, y)
+end
+
+function point:set(x, y)
 	self.x = x or 0
 	self.y = y or x or 0
 end

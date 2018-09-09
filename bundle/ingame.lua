@@ -5,7 +5,7 @@ local ingame = state:extend()
 local player = require "player"
 
 function ingame:init()
-	tsab_physics_new_world()
+	tsab.physics.new_world()
 
 	self.area = area()
 
@@ -18,18 +18,18 @@ function ingame:init()
 end
 
 function ingame:destroy()
-	tsab_physics_destroy_world()
 	self.area:destroy()
+	tsab.physics.destroy_world()
 end
 
 function ingame:update(dt)
-	tsab_physics_update()
+	tsab.physics.update()
 	self.area:update(dt)
 end
 
 function ingame:draw()
-	-- tsab_physics_draw()
 	self.area:draw()
+	tsab.physics.draw()
 end
 
 return ingame
