@@ -139,7 +139,22 @@ tsab.shaders.set = function(v)
 	tsab_shaders_set(v)
 end
 
-local default_shader = 	tsab.shaders.new("default.frag")
+local default_shader = 	tsab.shaders.new([[
+varying vec2 texCoord;
+
+uniform sampler2D tex;
+uniform vec4 color;
+uniform float textured;
+
+void main() {
+    if (textured > 0.5) {
+        gl_FragColor = texture2D(tex, texCoord) * color;
+    } else {
+        gl_FragColor = color;
+    }
+}
+]], true) -- true means that it wont read this as a file name, yet just compile it
+
 tsab.shaders.set(default_shader)
 tsab.graphics.color()
 tsab.shaders.set()

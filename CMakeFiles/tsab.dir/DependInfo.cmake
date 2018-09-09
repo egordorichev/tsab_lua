@@ -14,7 +14,6 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "src"
   "libs/include"
   "/usr/include/SDL2"
-  "/usr/include/luajit-2.0"
   )
 
 # Targets to which this target links.

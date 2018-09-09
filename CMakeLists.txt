@@ -3,7 +3,7 @@ project(tsab)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
-file(GLOB_RECURSE SOURCE_FILES src/*.cpp src/*.c)
+file(GLOB_RECURSE SOURCE_FILES src/main.cpp src/tsab.cpp)
 add_executable(tsab ${SOURCE_FILES})
 
 include_directories(src/ libs/include/)
@@ -22,13 +22,14 @@ endif()
 link_directories(libs/)
 target_link_libraries(tsab ${CMAKE_SOURCE_DIR}/libs/SDL_GPU/libSDL2_gpu.a)
 target_link_libraries(tsab ${CMAKE_SOURCE_DIR}/libs/SDL_GPU/libSDL2_gpu.so)
+target_link_libraries(tsab ${CMAKE_SOURCE_DIR}/libs/Lua/liblua.a)
 
-find_package(LuaJIT REQUIRED)
+#find_package(LuaJIT REQUIRED)
 
-if(LUAJIT_FOUND)
-	include_directories(${LUAJIT_INCLUDE_DIR})
-	target_link_libraries(tsab ${LUAJIT_LIBRARIES})
-endif()
+#if(LUAJIT_FOUND)
+#	include_directories(${LUAJIT_INCLUDE_DIR})
+#	target_link_libraries(tsab ${LUAJIT_LIBRARIES})
+#endif()
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
