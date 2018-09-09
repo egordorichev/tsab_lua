@@ -1,4 +1,4 @@
--- libs are global, so require them before everything else
+--[[ libs are global, so require them before everything else
 lume = require "lib.lume"
 object = require "lib.classic"
 flux = require "lib.flux"
@@ -61,4 +61,4 @@ function tsab.resize(w, h)
 
 	canvas_x = (w - canvas_scale * CANVAS_WIDTH) / 2
 	canvas_y = (h - canvas_scale * CANVAS_HEIGHT) / 2
-end
+end]]

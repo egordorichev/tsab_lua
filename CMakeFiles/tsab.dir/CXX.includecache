@@ -1,4 +1,4 @@
-#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
 
 #IncludeRegexScan: ^.*$
 
@@ -6,49 +6,41 @@
 
 #IncludeRegexTransform: 
 
-/home/egor/tsab/src/main.cpp
-tsab.hpp
-/home/egor/tsab/src/tsab.hpp
+/home/egor/tsab/src/graphics.cpp
+iostream
+-
+graphics.hpp
+/home/egor/tsab/src/graphics.hpp
+shaders.hpp
+/home/egor/tsab/src/shaders.hpp
 
-/home/egor/tsab/src/tsab.cpp
-SDL.h
--
-SDL_ttf.h
--
-SDL_mixer.h
--
-SDL_image.h
+/home/egor/tsab/src/graphics.hpp
+SDL2/SDL.h
 -
 SDL_GPU/SDL_gpu.h
 -
+SDL_ttf.h
+-
+SDL_image.h
+-
+lua.hpp
+/home/egor/tsab/src/lua.hpp
+
+/home/egor/tsab/src/lua.hpp
 Lua/lua.h
 -
 Lua/lauxlib.h
 -
 Lua/lualib.h
 -
-iostream
--
-string
--
-cstring
--
-map
+
+/home/egor/tsab/src/shaders.hpp
+SDL2/SDL.h
 -
 vector
 -
-sstream
--
-experimental/filesystem
--
-tsab.hpp
-/home/egor/tsab/src/tsab.hpp
-direct.h
--
-unistd.h
-/home/egor/tsab/src/unistd.h
-
-/home/egor/tsab/src/tsab.hpp
+lua.hpp
+/home/egor/tsab/src/lua.hpp
 
 /usr/include/SDL2/SDL.h
 SDL_main.h

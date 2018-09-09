@@ -30,4 +30,14 @@ function input:bind_key(name, keys)
 	end
 end
 
+function input:is_down(name)
+	if not name or not self.keys[name] then return false end
+
+	for _, v in pairs(self.keys[name]) do
+		if tsab.input.is_down(v) then
+			return true
+		end
+	end
+end
+
 return input
