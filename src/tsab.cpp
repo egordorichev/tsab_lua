@@ -24,6 +24,9 @@ extern "C" {
 #include <map>
 #include <vector>
 #include <sstream>
+#include <experimental/filesystem>
+
+namespace fs = std::experimental::filesystem;
 
 #include "tsab.hpp"
 
@@ -1459,6 +1462,66 @@ static int tsab_audio_set_music_volume(lua_State *L) {
 	return 0;
 }
 
+/*
+ * File system
+ */
+
+/*
+ * local dir = tsab.fs.getDirectoryFiles
+local isdir = tsab.fs.isDirectory
+local time = tsab.getTime or os.time
+local lastmodified = tsab.fs.getLastModified
+ */
+
+static int tsab_fs_get_directory_files(lua_State *L) {
+	std::string path = check_string(L, 1, ".");
+
+	if (path.empty()) {
+		path = ".";
+	}
+
+	lua_newtable(L);
+
+	if (!fs::exists(path)) {
+		return 1;
+	}
+
+	int i = 0;
+
+	auto dir = fs::directory_iterator(path);
+
+	for (auto & p : dir) {
+		lua_pushstring(L, p.path().generic_string().c_str());
+		lua_rawseti(L, -2, i);
+
+		i++;
+	}
+
+	return 1;
+}
+
+static int tsab_fs_is_directory(lua_State *L) {
+	std::error_code ec;
+	bool is = fs::is_directory(luaL_checkstring(L, 1), ec);
+
+	if (ec) {
+	}
+
+	lua_pushboolean(L, is);
+
+	return 1;
+}
+
+static int tsab_fs_get_last_modified(lua_State *L) {
+	auto time = fs::last_write_time(luaL_checkstring(L, 1));
+	lua_pushnumber(L, decltype(time)::clock::to_time_t(time));
+	return 1;
+}
+
+/*
+ * Main stuff
+ */
+
 SDL_Renderer *renderer;
 lua_State *L;
 
@@ -1590,6 +1653,10 @@ int tsab_init(int arg, char **argv) {
 	lua_register(L, "tsab_audio_set_sfx_volume", tsab_audio_set_sfx_volume);
 	lua_register(L, "tsab_audio_set_music_volume", tsab_audio_set_music_volume);
 	lua_register(L, "tsab_audio_set_general_volume", tsab_audio_set_general_volume);
+	// FS API
+	lua_register(L, "tsab_fs_get_directory_files", tsab_fs_get_directory_files);
+	lua_register(L, "tsab_fs_is_directory", tsab_fs_is_directory);
+	lua_register(L, "tsab_fs_get_last_modified", tsab_fs_get_last_modified);
 
 	// Create window
 

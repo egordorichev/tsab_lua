@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-/home/egor/tsab/src/main.cpp
-tsab.hpp
-/home/egor/tsab/src/tsab.hpp
-
 /home/egor/tsab/src/tsab.cpp
 SDL.h
 -
@@ -38,6 +34,8 @@ map
 vector
 -
 sstream
+-
+experimental/filesystem
 -
 tsab.hpp
 /home/egor/tsab/src/tsab.hpp

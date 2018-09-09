@@ -47,7 +47,6 @@
 					<Add directory="/home/egor/tsab/src"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
 					<Add directory="/usr/include/SDL2"/>
-					<Add directory="/usr/include/luajit-2.0"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 tsab"/>
@@ -66,7 +65,6 @@
 					<Add directory="/home/egor/tsab/src"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
 					<Add directory="/usr/include/SDL2"/>
-					<Add directory="/usr/include/luajit-2.0"/>
 				</Compiler>
 				<MakeCommands>
 					<Build command="/usr/bin/make -f &quot;/home/egor/tsab/Makefile&quot;  VERBOSE=1 tsab/fast"/>
@@ -87,9 +85,6 @@
 		</Unit>
 		<Unit filename="/home/egor/tsab/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
-		</Unit>
-		<Unit filename="/home/egor/tsab/cmake/FindLuaJIT.cmake">
-			<Option virtualFolder="CMake Files\cmake\"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/cmake/FindSDL2.cmake">
 			<Option virtualFolder="CMake Files\cmake\"/>
