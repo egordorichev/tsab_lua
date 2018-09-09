@@ -44,7 +44,7 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/egor/tsab/src"/>
+					<Add directory="/home/egor/tsab/include"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
 					<Add directory="/usr/include/SDL2"/>
 				</Compiler>
@@ -62,7 +62,7 @@
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/egor/tsab/src"/>
+					<Add directory="/home/egor/tsab/include"/>
 					<Add directory="/home/egor/tsab/libs/include"/>
 					<Add directory="/usr/include/SDL2"/>
 				</Compiler>
@@ -77,46 +77,28 @@
 		<Unit filename="/home/egor/tsab/src/audio.cpp">
 			<Option target="tsab"/>
 		</Unit>
-		<Unit filename="/home/egor/tsab/src/audio.hpp">
-			<Option target="tsab"/>
-		</Unit>
 		<Unit filename="/home/egor/tsab/src/fs.cpp">
-			<Option target="tsab"/>
-		</Unit>
-		<Unit filename="/home/egor/tsab/src/fs.hpp">
 			<Option target="tsab"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/src/graphics.cpp">
 			<Option target="tsab"/>
 		</Unit>
-		<Unit filename="/home/egor/tsab/src/graphics.hpp">
-			<Option target="tsab"/>
-		</Unit>
 		<Unit filename="/home/egor/tsab/src/input.cpp">
-			<Option target="tsab"/>
-		</Unit>
-		<Unit filename="/home/egor/tsab/src/input.hpp">
 			<Option target="tsab"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/src/lua.cpp">
 			<Option target="tsab"/>
 		</Unit>
-		<Unit filename="/home/egor/tsab/src/lua.hpp">
+		<Unit filename="/home/egor/tsab/src/main.cpp">
 			<Option target="tsab"/>
 		</Unit>
-		<Unit filename="/home/egor/tsab/src/main.cpp">
+		<Unit filename="/home/egor/tsab/src/physics.cpp">
 			<Option target="tsab"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/src/shaders.cpp">
 			<Option target="tsab"/>
 		</Unit>
-		<Unit filename="/home/egor/tsab/src/shaders.hpp">
-			<Option target="tsab"/>
-		</Unit>
 		<Unit filename="/home/egor/tsab/src/tsab.cpp">
-			<Option target="tsab"/>
-		</Unit>
-		<Unit filename="/home/egor/tsab/src/tsab.hpp">
 			<Option target="tsab"/>
 		</Unit>
 		<Unit filename="/home/egor/tsab/CMakeLists.txt">

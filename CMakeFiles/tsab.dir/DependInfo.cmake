@@ -10,6 +10,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/egor/tsab/src/input.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/input.cpp.o"
   "/home/egor/tsab/src/lua.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/lua.cpp.o"
   "/home/egor/tsab/src/main.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/main.cpp.o"
+  "/home/egor/tsab/src/physics.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/physics.cpp.o"
   "/home/egor/tsab/src/shaders.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/shaders.cpp.o"
   "/home/egor/tsab/src/tsab.cpp" "/home/egor/tsab/CMakeFiles/tsab.dir/src/tsab.cpp.o"
   )
@@ -17,7 +18,7 @@ set(CMAKE_CXX_COMPILER_ID "GNU")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "src"
+  "include"
   "libs/include"
   "/usr/include/SDL2"
   )

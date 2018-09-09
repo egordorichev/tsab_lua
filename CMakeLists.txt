@@ -4,11 +4,11 @@ project(tsab)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 set(CMAKE_CXX_STANDARD 14)
 
-file(GLOB_RECURSE SOURCE_FILES src/main.cpp src/tsab.cpp src/lua.cpp src/audio.cpp src/graphics.cpp src/shaders.cpp src/fs.cpp src/input.cpp)
+file(GLOB_RECURSE SOURCE_FILES src/main.cpp src/tsab.cpp src/lua.cpp src/audio.cpp src/graphics.cpp src/shaders.cpp src/fs.cpp src/input.cpp src/physics.cpp)
 add_executable(tsab ${SOURCE_FILES})
 
-include_directories(src/ libs/include/)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+include_directories(include/ libs/include/)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fPIC")
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_ttf REQUIRED)

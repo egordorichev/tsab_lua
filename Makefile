@@ -39,10 +39,10 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/egor/code/apps/clion-2018.2.2/bin/cmake/linux/bin/cmake
+CMAKE_COMMAND = /home/egor/code/apps/CLion-2018.2.3/clion-2018.2.3/bin/cmake/linux/bin/cmake
 
 # The command to remove a file.
-RM = /home/egor/code/apps/clion-2018.2.2/bin/cmake/linux/bin/cmake -E remove -f
+RM = /home/egor/code/apps/CLion-2018.2.3/clion-2018.2.3/bin/cmake/linux/bin/cmake -E remove -f
 
 # Escaping for special characters.
 EQUALS = =
@@ -59,7 +59,7 @@ CMAKE_BINARY_DIR = /home/egor/tsab
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/egor/code/apps/clion-2018.2.2/bin/cmake/linux/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/egor/code/apps/CLion-2018.2.3/clion-2018.2.3/bin/cmake/linux/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -70,7 +70,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
-	/home/egor/code/apps/clion-2018.2.2/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+	/home/egor/code/apps/CLion-2018.2.3/clion-2018.2.3/bin/cmake/linux/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -285,6 +285,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/physics.o: src/physics.cpp.o
+
+.PHONY : src/physics.o
+
+# target to build an object file
+src/physics.cpp.o:
+	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/physics.cpp.o
+.PHONY : src/physics.cpp.o
+
+src/physics.i: src/physics.cpp.i
+
+.PHONY : src/physics.i
+
+# target to preprocess a source file
+src/physics.cpp.i:
+	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/physics.cpp.i
+.PHONY : src/physics.cpp.i
+
+src/physics.s: src/physics.cpp.s
+
+.PHONY : src/physics.s
+
+# target to generate assembly for a file
+src/physics.cpp.s:
+	$(MAKE) -f CMakeFiles/tsab.dir/build.make CMakeFiles/tsab.dir/src/physics.cpp.s
+.PHONY : src/physics.cpp.s
+
 src/shaders.o: src/shaders.cpp.o
 
 .PHONY : src/shaders.o
@@ -366,6 +393,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/physics.o"
+	@echo "... src/physics.i"
+	@echo "... src/physics.s"
 	@echo "... src/shaders.o"
 	@echo "... src/shaders.i"
 	@echo "... src/shaders.s"

@@ -6,4 +6,6 @@ void tsab_loop();
 bool tsab_loop_step();
 void tsab_quit();
 
+static double timer_fixed_dt = 1.0 / 60.0;
+
 #endif

@@ -24,6 +24,7 @@
 #include "fs.hpp"
 #include "shaders.hpp"
 #include "graphics.hpp"
+#include "physics.hpp"
 #include "lua.hpp"
 
 /*
@@ -161,6 +162,7 @@ int tsab_init(int arg, char **argv) {
 	tsab_shaders_register_api(L);
 	tsab_audio_register_api(L);
 	tsab_fs_register_api(L);
+	tsab_physics_register_api(L);
 
 	// Do the api file
 	lua_pushcfunction(L, traceback);
@@ -202,7 +204,6 @@ int tsab_init(int arg, char **argv) {
 Uint64 timer_now = SDL_GetPerformanceCounter();
 Uint64 timer_last = 0;
 double timer_dt = 0;
-double timer_fixed_dt = 1.0 / 60.0;
 double timer_accumulator = 0;
 int frame;
 Uint32 start;

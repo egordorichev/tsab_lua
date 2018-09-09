@@ -5,6 +5,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/tsab.dir/src/input.cpp.o"
   "CMakeFiles/tsab.dir/src/lua.cpp.o"
   "CMakeFiles/tsab.dir/src/main.cpp.o"
+  "CMakeFiles/tsab.dir/src/physics.cpp.o"
   "CMakeFiles/tsab.dir/src/shaders.cpp.o"
   "CMakeFiles/tsab.dir/src/tsab.cpp.o"
   "tsab.pdb"
