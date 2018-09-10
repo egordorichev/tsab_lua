@@ -17,5 +17,11 @@ int tsab_ui_end(lua_State *L);
 int tsab_ui_button(lua_State *L);
 int tsab_ui_label(lua_State *L);
 int tsab_ui_text_input(lua_State *L);
+int tsab_ui_collapsing_header(lua_State *L);
+int tsab_ui_tree_node(lua_State *L);
+int tsab_ui_pop_node(lua_State *L);
+int tsab_ui_same_line(lua_State *L);
+int tsab_ui_slider_float2(lua_State *L);
+int tsab_ui_input_float2(lua_State *L);
 
 #endif

@@ -33,7 +33,6 @@ CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_blend
 CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_clipboard.h
 CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_config.h
 CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_cpuinfo.h
-CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_egl.h
 CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_endian.h
 CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_error.h
 CMakeFiles/tsab.dir/libs/ImGui/imgui_impl_sdl.cpp.o: /usr/include/SDL2/SDL_events.h
@@ -361,7 +360,6 @@ CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_rect.h
 CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_render.h
 CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_rwops.h
 CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_scancode.h
-CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_shape.h
 CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_stdinc.h
 CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_surface.h
 CMakeFiles/tsab.dir/src/tsab.cpp.o: /usr/include/SDL2/SDL_system.h

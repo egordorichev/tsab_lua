@@ -45,13 +45,13 @@ function tsab.update(dt)
 end
 
 function tsab.draw()
-	--[[tsab.graphics.set_canvas(canvas)
-	tsab.graphics.clear()
+	tsab.graphics.set_canvas(canvas)
+	tsab.graphics.clear(0, 0.5, 1)
 
 	game.draw()
 
 	tsab.graphics.set_canvas()
-	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)]]
+	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)
 
 	debug.draw()
 end

@@ -14,6 +14,7 @@ function creature:die()
 
 	self.dead = true
 	self.hp = 0
+	self.done = true
 end
 
 function creature:modify_hp(a)

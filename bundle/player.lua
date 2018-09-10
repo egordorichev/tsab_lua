@@ -2,6 +2,8 @@ local point = require "l2.point"
 local creature = require "l2.creature"
 local player = creature:extend()
 
+player.type_name = "player"
+
 function player:init()
 	player.super.init(self)
 
@@ -16,6 +18,14 @@ end
 
 function player:destroy()
 	self.body:destroy()
+end
+
+function player:set(...)
+	player.super.set(self, ...)
+
+	if self.body then
+		self.body:set_transform(self.x, self.y, 0)
+	end
 end
 
 function player:update(dt)

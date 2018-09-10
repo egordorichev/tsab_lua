@@ -498,8 +498,7 @@ void setup_key_map() {
 	key_map["7"] = SDL_SCANCODE_7;
 	key_map["8"] = SDL_SCANCODE_8;
 	key_map["9"] = SDL_SCANCODE_9;
-	key_map["f0"] = SDL_SCANCODE_F1;
-	key_map["f1"] = SDL_SCANCODE_F2;
+	key_map["f1"] = SDL_SCANCODE_F1;
 	key_map["f2"] = SDL_SCANCODE_F2;
 	key_map["f3"] = SDL_SCANCODE_F3;
 	key_map["f4"] = SDL_SCANCODE_F4;

@@ -16,10 +16,9 @@ CMake Warning (dev) at /home/egor/code/apps/clion-2018.2.2/bin/cmake/linux/share
   OpenGL_GL_PREFERENCE has not been set to "GLVND" or "LEGACY", so for
   compatibility with CMake 3.10 and below the legacy GL library will be used.
 Call Stack (most recent call first):
-  CMakeLists.txt:35 (find_package)
+  CMakeLists.txt:36 (find_package)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
--- Found OpenGL: /usr/lib/x86_64-linux-gnu/libOpenGL.so   
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/egor/tsab

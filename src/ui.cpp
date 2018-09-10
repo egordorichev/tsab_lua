@@ -39,6 +39,12 @@ void tsab_ui_register_api(lua_State *L) {
 	lua_register(L, "tsab_ui_render", tsab_ui_render);
 	lua_register(L, "tsab_ui_begin", tsab_ui_begin);
 	lua_register(L, "tsab_ui_end", tsab_ui_end);
+	lua_register(L, "tsab_ui_collapsing_header", tsab_ui_collapsing_header);
+	lua_register(L, "tsab_ui_tree_node", tsab_ui_tree_node);
+	lua_register(L, "tsab_ui_pop_node", tsab_ui_pop_node);
+	lua_register(L, "tsab_ui_same_line", tsab_ui_same_line);
+	lua_register(L, "tsab_ui_slider_float2", tsab_ui_slider_float2);
+	lua_register(L, "tsab_ui_input_float2", tsab_ui_input_float2);
 }
 
 void tsab_ui_handle_event(SDL_Event *event) {
@@ -53,16 +59,10 @@ struct compare
 	}
 };
 
-std::map<char *, char *, compare> buffers;
-
 void tsab_ui_quit() {
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
-
-	for (auto it = buffers.begin(); it != buffers.end(); it++) {
-		delete it->second;
-	}
 }
 
 int tsab_ui_frame(lua_State *L) {
@@ -90,25 +90,33 @@ int tsab_ui_label(lua_State *L) {
 }
 
 int tsab_ui_text_input(lua_State *L) {
-	char *id = const_cast<char *>(luaL_checkstring(L, 1));
-	char *buffer;
-
-	if (buffers.find(id) == buffers.end()) {
-		char *b = new char[64];
-		b[63] = '\0';
-		buffers[id] = b;
-	}
-
-	buffer = buffers[id];
-	ImGui::InputText(id, buffer, 64);
+	char *buffer = (char *) luaL_checkstring(L, 2);
+	bool v = ImGui::InputText(luaL_checkstring(L, 1), buffer, 64);
 
 	lua_pushstring(L, buffer);
-	return 1;
+	lua_pushboolean(L, v);
+
+	return 2;
 }
 
 int tsab_ui_render(lua_State *L) {
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	return 0;
+}
+
+int tsab_ui_collapsing_header(lua_State *L) {
+	lua_pushboolean(L, ImGui::CollapsingHeader(luaL_checkstring(L, 1)));
+	return 1;
+}
+
+int tsab_ui_tree_node(lua_State *L) {
+	lua_pushboolean(L, ImGui::TreeNode(luaL_checkstring(L, 1)));
+	return 1;
+}
+
+int tsab_ui_pop_node(lua_State *L) {
+	ImGui::TreePop();
 	return 0;
 }
 
@@ -120,4 +128,39 @@ int tsab_ui_begin(lua_State *L) {
 int tsab_ui_end(lua_State *L) {
 	ImGui::End();
 	return 0;
+}
+
+int tsab_ui_same_line(lua_State *L) {
+	ImGui::SameLine(0, 5);
+	return 0;
+}
+
+int tsab_ui_slider_float2(lua_State *L) {
+	float values[2] = {
+		static_cast<float>(luaL_checknumber(L, 2)),
+		static_cast<float>(luaL_checknumber(L, 3))
+	};
+
+	bool v = ImGui::SliderFloat2(luaL_checkstring(L, 1), values, check_number(L, 3, 0), check_number(L, 4, 10), "%.2f", check_number(L, 5, 1));
+
+	lua_pushnumber(L, values[0]);
+	lua_pushnumber(L, values[1]);
+	lua_pushboolean(L, v);
+
+	return 3;
+}
+
+int tsab_ui_input_float2(lua_State *L) {
+	float values[2] = {
+		static_cast<float>(luaL_checknumber(L, 2)),
+		static_cast<float>(luaL_checknumber(L, 3))
+	};
+
+	bool v = ImGui::InputFloat2(luaL_checkstring(L, 1), values);
+
+	lua_pushnumber(L, values[0]);
+	lua_pushnumber(L, values[1]);
+	lua_pushboolean(L, v);
+
+	return 3;
 }

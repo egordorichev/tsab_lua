@@ -13,6 +13,10 @@ std::vector<GPU_Image *> canvas_list;
 std::vector<TTF_Font *> fonts;
 TTF_Font *active_font;
 
+int clamp(int val, int min, int max) {
+	return std::min(std::max(min, val), max);
+}
+
 void tsab_graphics_init(int w, int h, int mw, int mh, char *title, int flags) {
 	GPU_SetDebugLevel(GPU_DEBUG_LEVEL_MAX);
 	GPU_SetRequiredFeatures(GPU_FEATURE_BASIC_SHADERS);
@@ -142,7 +146,17 @@ int tsab_graphics_set_canvas(lua_State *L) {
 }
 
 int tsab_graphics_clear(lua_State *L) {
-	GPU_ClearRGB(current_target == nullptr ? screen : current_target->target, bg_color[0], bg_color[1], bg_color[2]);
+	if (lua_isnumber(L, 1)) {
+		float r = clamp(luaL_checknumber(L, 1) * 255, 0, 255);
+		float g = clamp(luaL_checknumber(L, 2) * 255, 0, 255);
+		float b = clamp(luaL_checknumber(L, 3) * 255, 0, 255);
+		float a = clamp(check_number(L, 4, 1) * 255, 0, 255);
+
+		GPU_ClearRGBA(current_target == nullptr ? screen : current_target->target, r, g, b, a);
+	} else {
+		GPU_ClearRGB(current_target == nullptr ? screen : current_target->target, bg_color[0], bg_color[1], bg_color[2]);
+	}
+
 	return 0;
 }
 
@@ -295,10 +309,6 @@ int tsab_graphics_line(lua_State *L) {
 	GPU_Line(current_target == nullptr ? screen : current_target->target, x1 + 0.5, y1 + 0.5, x2 + 0.5, y2 + 0.5, current_color);
 
 	return 0;
-}
-
-int clamp(int val, int min, int max) {
-	return std::min(std::max(min, val), max);
 }
 
 int tsab_graphics_set_clear_color(lua_State *L) {
