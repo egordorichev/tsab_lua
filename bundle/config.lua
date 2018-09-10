@@ -2,7 +2,7 @@ CANVAS_WIDTH = 256
 CANVAS_HEIGHT = math.floor(CANVAS_WIDTH / 3 * 2)
 PIXEL_PERFECT = false
 
-local default_scale = 2
+local default_scale = 3
 
 config = {
 	window = {

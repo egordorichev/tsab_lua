@@ -35,6 +35,7 @@ void tsab_ui_register_api(lua_State *L) {
 	lua_register(L, "tsab_ui_frame", tsab_ui_frame);
 	lua_register(L, "tsab_ui_button", tsab_ui_button);
 	lua_register(L, "tsab_ui_text_input", tsab_ui_text_input);
+	lua_register(L, "tsab_ui_label", tsab_ui_label);
 	lua_register(L, "tsab_ui_render", tsab_ui_render);
 	lua_register(L, "tsab_ui_begin", tsab_ui_begin);
 	lua_register(L, "tsab_ui_end", tsab_ui_end);
@@ -74,6 +75,18 @@ int tsab_ui_frame(lua_State *L) {
 int tsab_ui_button(lua_State *L) {
 	lua_pushboolean(L, ImGui::Button(check_string(L, 1, "Button")));
 	return 1;
+}
+
+int tsab_ui_label(lua_State *L) {
+	const char *str = luaL_checkstring(L, 1);
+
+	if (lua_isstring(L, 2)) {
+		ImGui::LabelText(luaL_checkstring(L, 2), str);
+	} else {
+		ImGui::Text("%s", str);
+	}
+
+	return 0;
 }
 
 int tsab_ui_text_input(lua_State *L) {

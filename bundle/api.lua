@@ -291,3 +291,4 @@ tsab.ui.text_input = tsab_ui_text_input
 tsab.ui.render = tsab_ui_render
 tsab.ui.begin = tsab_ui_begin
 tsab.ui.finish = tsab_ui_end
+tsab.ui.label = tsab_ui_label

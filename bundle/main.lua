@@ -4,10 +4,12 @@ object = require "lib.classic"
 flux = require "lib.flux"
 tick = require "lib.tick"
 lurker = require "lib.lurker"
+log = require "lib.log"
 
 -- requires
 game = require "l2.game" -- also global
 local ingame = require "ingame"
+local debug = require "l2.debug"
 
 local canvas
 local canvas_x
@@ -26,6 +28,8 @@ function tsab.init()
 	tsab.resize(tsab.graphics.get_size())
 
 	game.init(ingame())
+
+	print("hi")
 end
 
 function tsab.destroy()
@@ -41,27 +45,15 @@ function tsab.update(dt)
 end
 
 function tsab.draw()
-	tsab.graphics.set_canvas(canvas)
+	--[[tsab.graphics.set_canvas(canvas)
 	tsab.graphics.clear()
 
 	game.draw()
 
 	tsab.graphics.set_canvas()
-	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)
-	tsab.graphics.color(0, 255, 0)
-	tsab.graphics.print(math.floor(tsab.get_fps()))
+	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)]]
 
-	tsab.ui.frame()
-
-	tsab.ui.begin("Debug")
-	if tsab.ui.button("Quit") then
-		tsab.quit()
-	end
-
-	tsab.ui.text_input("Halp")
-	tsab.ui.finish()
-
-	tsab.ui.render()
+	debug.draw()
 end
 
 function tsab.resize(w, h)

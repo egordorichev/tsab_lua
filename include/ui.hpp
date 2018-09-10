@@ -15,6 +15,7 @@ int tsab_ui_render(lua_State *L);
 int tsab_ui_begin(lua_State *L);
 int tsab_ui_end(lua_State *L);
 int tsab_ui_button(lua_State *L);
+int tsab_ui_label(lua_State *L);
 int tsab_ui_text_input(lua_State *L);
 
 #endif
