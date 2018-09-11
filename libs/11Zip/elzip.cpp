@@ -1,4 +1,7 @@
 #include "elzip.hpp"
+#include "zipper.h"
+
+#include <cstring>
 
 namespace fs = std::experimental::filesystem;
 
@@ -27,4 +30,49 @@ namespace elz
             wFile.close();
         }
     }
+
+	inline bool ends_with(std::string const & value, std::string const & ending)
+	{
+		if (ending.size() > value.size()) return false;
+		return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+	}
+
+  void zipFolder(std::string folder, std::string out) {
+    if (!std::experimental::filesystem::exists(folder)) {
+      std::cout << "No such folder\n";
+      return;
+    }
+
+	  if (ends_with(folder, "/")) {
+	  	out.erase(out.length(), out.length());
+	  }
+
+    int len = folder.length();
+
+    if (!ends_with(out, ".tsab")) {
+    	out += ".tsab";
+    }
+
+    ziputils::zipper zipFile;
+    zipFile.open(out.c_str(), false);
+
+    for (auto &p: std::experimental::filesystem::recursive_directory_iterator(folder)) {
+    	if (!std::experimental::filesystem::is_directory(p)) {
+		    std::string str = p.path().relative_path().generic_string();
+		    char *pt = (char *) str.erase(0, len).c_str();
+
+		    if (strstr(pt, ".zip") == NULL) {
+			    std::ifstream file(str, std::ios::in | std::ios::binary);
+			    std::cout << "Adding " << pt << "\n";
+
+			    zipFile.addEntry(pt);
+			    zipFile << file;
+
+			    file.close();
+		    }
+	    }
+    }
+
+    zipFile.close();
+  }
 }

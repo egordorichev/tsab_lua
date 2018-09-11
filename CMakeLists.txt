@@ -4,10 +4,13 @@ project(tsab)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 set(CMAKE_CXX_STANDARD 14)
 
-file(GLOB_RECURSE SOURCE_FILES src/*.cpp libs/*cpp libs/*.c)
+file(GLOB_RECURSE SOURCE_FILES runner/src/*.cpp libs/*.cpp libs/*.c)
 add_executable(tsab ${SOURCE_FILES})
 
-include_directories(include/ libs/include/ libs/ libs/11Zip/minizip/include)
+file(GLOB_RECURSE UTIL_FILES util/src/*.cpp libs/11Zip/*.cpp libs/11Zip/*.c)
+add_executable(tsab-util ${UTIL_FILES})
+
+include_directories(runner/include/ util/include/ libs/include/ libs/ libs/11Zip/minizip/include)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -fPIC")
 
 find_package(SDL2 REQUIRED)
@@ -25,12 +28,7 @@ target_link_libraries(tsab ${CMAKE_SOURCE_DIR}/libs/Lua/liblua.a)
 target_link_libraries(tsab ${CMAKE_SOURCE_DIR}/libs/Box2D/libBox2D.a)
 target_link_libraries(tsab stdc++fs)
 
-#find_package(LuaJIT REQUIRED)
-
-#if(LUAJIT_FOUND)
-#	include_directories(${LUAJIT_INCLUDE_DIR})
-#	target_link_libraries(tsab ${LUAJIT_LIBRARIES})
-#endif()
+target_link_libraries(tsab-util stdc++fs)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)

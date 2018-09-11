@@ -10,7 +10,8 @@
          For more info read MiniZip_info.txt
 
 */
-/*
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+
 #include <windows.h>
 
 
@@ -25,4 +26,5 @@ void fill_win32_filefunc64W OF((zlib_filefunc64_def* pzlib_filefunc_def));
 
 #ifdef __cplusplus
 }
-#endif*/
+#endif
+#endif
