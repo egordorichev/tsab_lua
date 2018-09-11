@@ -99,8 +99,6 @@ int open_zip(char *path) {
 	elz::extractZip(path, tmp);
 	tsab_fs_set_working_dir(tmp.c_str());
 
-	std::cout << path << "\n";
-
 	return 0;
 }
 
@@ -109,7 +107,7 @@ int tsab_init(int arg, char **argv) {
 		char *path = argv[1];
 		char *dot = strrchr(path, '.');
 
-		if (dot && strcmp(dot, ".zip") == 0) {
+		if (dot && strcmp(dot, ".tsab") == 0 || dot && strcmp(dot, ".zip") == 0) {
 			if (open_zip(path) != 0) {
 				return -1;
 			}
