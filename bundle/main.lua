@@ -26,10 +26,9 @@ function tsab.init()
 
 	canvas = tsab.graphics.new_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
 	tsab.resize(tsab.graphics.get_size())
+	tsab.graphics.background_color("#f6ca9c")
 
 	game.init(ingame())
-
-	print("hi")
 end
 
 function tsab.destroy()
@@ -46,11 +45,12 @@ end
 
 function tsab.draw()
 	tsab.graphics.set_canvas(canvas)
-	tsab.graphics.clear(0, 0.5, 1)
+	tsab.graphics.clear()
 
 	game.draw()
 
 	tsab.graphics.set_canvas()
+	tsab.graphics.color()
 	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)
 
 	debug.draw()

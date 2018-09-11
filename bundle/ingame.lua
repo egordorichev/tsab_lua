@@ -3,11 +3,15 @@ local state = require "l2.state"
 local ingame = state:extend()
 
 local player = require "player"
+local level = require "l2.level"
 
 function ingame:init()
 	tsab.physics.new_world()
-
 	self.area = area()
+
+	local lvl = level("data/map/test", "data/image/tiles.png")
+
+	self.area:add(lvl)
 
 	local plr = player()
 

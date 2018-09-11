@@ -1,4 +1,5 @@
 #include <iostream>
+#include <regex>
 
 #include "graphics.hpp"
 #include "shaders.hpp"
@@ -312,13 +313,30 @@ int tsab_graphics_line(lua_State *L) {
 }
 
 int tsab_graphics_set_clear_color(lua_State *L) {
-	double r = check_number(L, 1, 1);
-	double g = check_number(L, 2, 1);
-	double b = check_number(L, 3, 1);
+	if (lua_isstring(L, 1)) {
+		std::string color = luaL_checkstring(L, 1);
 
-	bg_color[0] = clamp(r * 255, 0, 255);
-	bg_color[1] = clamp(g * 255, 0, 255);
-	bg_color[2] = clamp(b * 255, 0, 255);
+		if (color.size() != 7) {
+			return 0;
+		}
+
+		std::regex pattern("#?([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
+		std::smatch match;
+
+		if (std::regex_match(color, match, pattern)) {
+			bg_color[0] = std::stoul(match[1].str(), nullptr, 16);
+			bg_color[1] = std::stoul(match[2].str(), nullptr, 16);
+			bg_color[2] = std::stoul(match[3].str(), nullptr, 16);
+		}
+	} else {
+		double r = check_number(L, 1, 1);
+		double g = check_number(L, 2, 1);
+		double b = check_number(L, 3, 1);
+
+		bg_color[0] = clamp(r * 255, 0, 255);
+		bg_color[1] = clamp(g * 255, 0, 255);
+		bg_color[2] = clamp(b * 255, 0, 255);
+	}
 
 	return 0;
 }
