@@ -10,6 +10,7 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 #include <SDL_GPU/SDL_gpu.h>
+#include <11Zip/elzip.hpp>
 
 #include <iostream>
 #include <string>
@@ -17,6 +18,10 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <experimental/filesystem>
+#include <fcntl.h>
+
+namespace fs = std::experimental::filesystem;
 
 #include "tsab.hpp"
 #include "audio.hpp"
@@ -76,30 +81,48 @@ static void report_lua_error(lua_State *L) {
 
 lua_State *L;
 
+#include <chrono>
+#include <thread>
+
+int open_zip(char *path) {
+	if (!fs::exists(path)) {
+		std::cerr << path << " was not found\n";
+		return -1;
+	}
+
+	if (fs::exists("/tmp/tsab")) {
+		fs::remove_all("/tmp/tsab");
+		fs::remove("/tmp/tsab");
+	}
+
+	std::string tmp = std::string(fs::temp_directory_path().generic_string().c_str()) + "/tsab";
+	elz::extractZip(path, tmp);
+	tsab_fs_set_working_dir(tmp.c_str());
+
+	std::cout << path << "\n";
+
+	return 0;
+}
+
 int tsab_init(int arg, char **argv) {
 	if (arg >= 2) {
-		tsab_fs_set_working_dir(argv[1]);
+		char *path = argv[1];
+		char *dot = strrchr(path, '.');
+
+		if (dot && strcmp(dot, ".zip") == 0) {
+			if (open_zip(path) != 0) {
+				return -1;
+			}
+		} else {
+			tsab_fs_set_working_dir(path);
+		}
+	} else if (fs::exists(DEFAULT_CONTENT_ZIP)) {
+		open_zip((char *) DEFAULT_CONTENT_ZIP);
 	}
 
 	// Do the config file
 	L = luaL_newstate();
 	luaL_openlibs(L);
-
-	lua_pushcfunction(L, traceback);
-	int rv = luaL_loadfile(L, "config.lua");
-
-	if (rv) {
-		std::cerr << lua_tostring(L, -1) << std::endl;
-		return rv;
-	} else {
-		if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
-			report_lua_error(L);
-		}
-	}
-
-	lua_getglobal(L, "config");
-	lua_pushstring(L, "window");
-	lua_gettable(L, -2);
 
 	int window_width = 640;
 	int window_height = 480;
@@ -107,43 +130,64 @@ int tsab_init(int arg, char **argv) {
 	int window_min_height = 0;
 	bool resizeable;
 	char *window_title;
+	int rv;
 
-	if (!lua_isnil(L, -1)) {
-		lua_pushstring(L, "width");
-		lua_gettable(L, -2);
-		window_width = check_number(L, -1, window_width);
-		lua_pop(L, 1);
+	if (fs::exists("config.lua")) {
+		lua_pushcfunction(L, traceback);
+		rv = luaL_loadfile(L, "config.lua");
 
-		lua_pushstring(L, "height");
-		lua_gettable(L, -2);
-		window_height = check_number(L, -1, window_height);
-		lua_pop(L, 1);
+		if (rv) {
+			std::cerr << lua_tostring(L, -1) << std::endl;
+			return rv;
+		} else {
+			if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
+				report_lua_error(L);
+			}
+		}
 
-		lua_pushstring(L, "min_width");
+		lua_getglobal(L, "config");
+		lua_pushstring(L, "window");
 		lua_gettable(L, -2);
-		window_min_width = check_number(L, -1, window_min_width);
-		lua_pop(L, 1);
 
-		lua_pushstring(L, "min_height");
-		lua_gettable(L, -2);
-		window_min_height = check_number(L, -1, window_min_height);
-		lua_pop(L, 1);
+		if (!lua_isnil(L, -1)) {
+			lua_pushstring(L, "width");
+			lua_gettable(L, -2);
+			window_width = check_number(L, -1, window_width);
+			lua_pop(L, 1);
 
-		lua_pushstring(L, "resizeable");
-		lua_gettable(L, -2);
-		resizeable = check_bool(L, -1, true);
-		lua_pop(L, 1);
+			lua_pushstring(L, "height");
+			lua_gettable(L, -2);
+			window_height = check_number(L, -1, window_height);
+			lua_pop(L, 1);
 
-		lua_pushstring(L, "title");
-		lua_gettable(L, -2);
-		window_title = (char *) check_string(L, -1, "To Steam and beyond!");
+			lua_pushstring(L, "min_width");
+			lua_gettable(L, -2);
+			window_min_width = check_number(L, -1, window_min_width);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "min_height");
+			lua_gettable(L, -2);
+			window_min_height = check_number(L, -1, window_min_height);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "resizeable");
+			lua_gettable(L, -2);
+			resizeable = check_bool(L, -1, true);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "title");
+			lua_gettable(L, -2);
+			window_title = (char *) check_string(L, -1, "To Steam and beyond!");
+			lua_pop(L, 1);
+		}
+
+		lua_pop(L, 1); // Window level
 		lua_pop(L, 1);
+	} else {
+		std::cout << "Warning: config.lua was not found\n";
 	}
 
-	lua_pop(L, 1); // Window level
-	lua_pop(L, 1);
-
-	int flags = SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL;
+	int flags = SDL_WINDOW_OPENGL;
 
 	if (resizeable) {
 		flags |= SDL_WINDOW_RESIZABLE;
@@ -167,38 +211,48 @@ int tsab_init(int arg, char **argv) {
 	tsab_physics_register_api(L);
 	tsab_ui_register_api(L);
 
-	// Do the api file
-	lua_pushcfunction(L, traceback);
-	rv = luaL_loadfile(L, "api.lua");
+	if (fs::exists("api.lua")) {
+		// Do the api file
+		lua_pushcfunction(L, traceback);
+		rv = luaL_loadfile(L, "api.lua");
 
-	if (rv) {
-		std::cerr << lua_tostring(L, -1) << std::endl;
-		return rv;
+		if (rv) {
+			std::cerr << lua_tostring(L, -1) << std::endl;
+			return rv;
+		} else {
+			if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
+				report_lua_error(L);
+			}
+		}
 	} else {
+		std::cout << "Warning: api.lua was not found\n";
+	}
+
+	if (fs::exists("main.lua")) {
+		// Do the main file
+		lua_pushcfunction(L, traceback);
+		rv = luaL_loadfile(L, "main.lua");
+
+		if (rv) {
+			std::cerr << lua_tostring(L, -1) << std::endl;
+			return rv;
+		} else {
+			if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
+				report_lua_error(L);
+			}
+		}
+
+		// Call init
+		lua_pushcfunction(L, traceback);
+		lua_getglobal(L, "tsab_init");
+
 		if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
 			report_lua_error(L);
 		}
-	}
-
-	// Do the main file
-	lua_pushcfunction(L, traceback);
-	rv = luaL_loadfile(L, "main.lua");
-
-	if (rv) {
-		std::cerr << lua_tostring(L, -1) << std::endl;
-		return rv;
 	} else {
-		if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
-			report_lua_error(L);
-		}
-	}
-
-	// Call init
-	lua_pushcfunction(L, traceback);
-	lua_getglobal(L, "tsab_init");
-
-	if (lua_pcall(L, 0, 0, lua_gettop(L) - 1) != 0) {
-		report_lua_error(L);
+		std::cerr << "Error: main.lua was not found\n";
+		tsab_quit();
+		return -1;
 	}
 
 	return 0;

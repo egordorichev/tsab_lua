@@ -26,6 +26,8 @@ void tsab_graphics_init(int w, int h, int mw, int mh, char *title, int flags) {
 	TTF_Init();
 
 	window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, flags);
+	SDL_HideWindow(window);
+
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	GPU_SetInitWindow(SDL_GetWindowID(window));
 	SDL_SetWindowMinimumSize(window, mw, mh);
