@@ -36,6 +36,21 @@ static void pack(int argc, char **argv) {
 	elz::zipFolder(name, out);
 }
 
+static void dist(int argc, char **argv) {
+	char *name = (char *) "content.tsab";
+
+	if (argc > 2) {
+		name = argv[2];
+	}
+
+	if (!fs::exists(std::string(name))) {
+		std::cout << "Error: " << name << " was not found, you can specify your file name after `dist`\n";
+		return;
+	}
+
+	std::cout << "TODO: implement\n";
+}
+
 int main(int argc, char **argv) {
 	if (argc <= 1) {
 		print_help(argc, argv, false);
@@ -46,6 +61,8 @@ int main(int argc, char **argv) {
 			print_help(argc, argv, argc > 2);
 		} else if (strcmp(command, "pack") == 0) {
 			pack(argc, argv);
+		} else if (strcmp(command, "dist") == 0) {
+			dist(argc, argv);
 		} else {
 			std::cout << "Unknown option " << command << ", use help for help\n";
 		}

@@ -1,4 +1,5 @@
 #include <SDL2/SDL.h>
+#include <SDL_GPU/SDL_gpu.h>
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_sdl.h>
 #include <ImGui/imgui_impl_opengl3.h>
@@ -89,8 +90,14 @@ int tsab_ui_label(lua_State *L) {
 	return 0;
 }
 
+#include <iostream>
+
+char buffer[64] = "";
+
 int tsab_ui_text_input(lua_State *L) {
-	char *buffer = (char *) luaL_checkstring(L, 2);
+	char *name = (char *) luaL_checkstring(L, 2);
+	sprintf(buffer, "%.4s", name);
+
 	bool v = ImGui::InputText(luaL_checkstring(L, 1), buffer, 64);
 
 	lua_pushstring(L, buffer);
@@ -100,6 +107,7 @@ int tsab_ui_text_input(lua_State *L) {
 }
 
 int tsab_ui_render(lua_State *L) {
+	GPU_FlushBlitBuffer();
 	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	return 0;
@@ -121,6 +129,7 @@ int tsab_ui_pop_node(lua_State *L) {
 }
 
 int tsab_ui_begin(lua_State *L) {
+	ImGui::SetNextWindowBgAlpha(0.8f);
 	ImGui::Begin(luaL_checkstring(L, 1));
 	return 0;
 }

@@ -21,7 +21,8 @@ function tsab.init()
 		left = { "left", "a" },
 		right = { "right", "d" },
 		up = { "up", "w" },
-		down = { "down", "s" }
+		down = { "down", "s" },
+		jump = { "x", "space" }
 	})
 
 	canvas = tsab.graphics.new_canvas(CANVAS_WIDTH, CANVAS_HEIGHT)

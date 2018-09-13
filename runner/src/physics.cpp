@@ -22,6 +22,7 @@ void tsab_physics_register_api(lua_State *L) {
 	lua_register(L, "tsab_physics_get_body_transform", tsab_physics_get_body_transform);
 	lua_register(L, "tsab_physics_set_body_velocity", tsab_physics_set_body_velocity);
 	lua_register(L, "tsab_physics_get_body_velocity", tsab_physics_get_body_velocity);
+	lua_register(L, "tsab_physics_add_fixture", tsab_physics_add_fixture);
 }
 
 int tsab_physics_new_world(lua_State *L) {
@@ -68,6 +69,90 @@ void no_world() {
 	std::cerr << "World was not created yet\n";
 }
 
+void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
+	b2FixtureDef fixture;
+	fixture.isSensor = sensor;
+
+	lua_getfield(L, from, "shape");
+	lua_getfield(L, from, "x");
+	lua_getfield(L, from, "y");
+	lua_getfield(L, from, "centred");
+
+	const char *shape = check_string(L, -4, "rect");
+	double x = check_number(L, -3, 0);
+	double y = check_number(L, -2, 0);
+	bool centered = check_bool(L, -1, false);
+	lua_pop(L, 4);
+
+	if (strcmp(shape, "rect") == 0) {
+		lua_getfield(L, from, "w");
+		lua_getfield(L, from, "h");
+		double w = check_number(L, -2, 1);
+		double h = check_number(L, -1, 1);
+
+		b2Vec2 vertices[4];
+
+		if (centered) {
+			vertices[0].Set(x + -w / 2, y + -h / 2);
+			vertices[1].Set(x + -w / 2, y + h / 2);
+			vertices[2].Set(x + w / 2, y + h / 2);
+			vertices[3].Set(x + w / 2, y + -h / 2);
+		} else {
+			vertices[0].Set(x + 0, y + 0);
+			vertices[1].Set(x + 0, y + h);
+			vertices[2].Set(x + w, y + h);
+			vertices[3].Set(x + w, y + 0);
+		}
+		b2PolygonShape polygonShape;
+
+		polygonShape.Set(vertices, 4);
+		fixture.shape = &polygonShape;
+		body->CreateFixture(&fixture);
+
+		lua_pop(L, 2);
+	} else if (strcmp(shape, "circle") == 0) {
+		lua_getfield(L, 2, "h");
+		double r = check_number(L, -1, 1);
+		b2CircleShape circleShape;
+
+		circleShape.m_radius = r;
+		circleShape.m_p.x = x;
+		circleShape.m_p.y = y;
+
+		if (!centered) {
+			circleShape.m_p.x += r;
+			circleShape.m_p.y += r;
+		}
+
+		fixture.shape = &circleShape;
+		body->CreateFixture(&fixture);
+
+		lua_pop(L, 1);
+	} else {
+		std::cerr << "Wrong shape type!\n";
+		b2PolygonShape polygonShape;
+
+		polygonShape.SetAsBox(1, 1);
+		fixture.shape = &polygonShape;
+
+		body->CreateFixture(&fixture);
+	}
+}
+
+int tsab_physics_add_fixture(lua_State *L) {
+	if (world == nullptr) {
+		no_world();
+		return 0;
+	}
+
+	int id = luaL_checknumber(L, 1);
+
+	if (id > -1 && id < body_list.size()) {
+		b2Body *body = body_list[id];
+		parse_fixture(L, body, 2, check_bool(L, 3, false));
+	}
+}
+
 int tsab_physics_new_body(lua_State *L) {
 	if (world == nullptr) {
 		no_world();
@@ -83,7 +168,7 @@ int tsab_physics_new_body(lua_State *L) {
 	} else if (strcmp(type, "kinematic") == 0) {
 		def.type = b2_kinematicBody;
 	} else {
-		if (strcmp(type, "kinematic") != 0) {
+		if (strcmp(type, "static") != 0) {
 			std::cerr << "Unknown body type " << type << ", setting to static. Should be one of: dynamic, kinematic, static\n";
 		}
 
@@ -91,78 +176,13 @@ int tsab_physics_new_body(lua_State *L) {
 	}
 
 	b2Body* body = world->CreateBody(&def);
-	b2FixtureDef fixture;
-	b2PolygonShape polygonShape;
-	b2CircleShape circleShape;
 
 	if (lua_istable(L, 2)) {
-		lua_getfield(L, 2, "shape");
-		lua_getfield(L, 2, "x");
-		lua_getfield(L, 2, "y");
-		lua_getfield(L, 2, "centred");
-
-		const char *shape = check_string(L, -4, "rect");
-		double x = check_number(L, -3, 0);
-		double y = check_number(L, -2, 0);
-		bool centered = check_bool(L, -1, false);
-		lua_pop(L, 4);
-
-		if (strcmp(shape, "rect") == 0) {
-			lua_getfield(L, 2, "w");
-			lua_getfield(L, 2, "h");
-			double w = check_number(L, -2, 1);
-			double h = check_number(L, -1, 1);
-
-			b2Vec2 vertices[4];
-
-			if (centered) {
-				vertices[0].Set(-w / 2, -h / 2);
-				vertices[1].Set(-w / 2,  h / 2);
-				vertices[2].Set(w / 2, h / 2);
-				vertices[3].Set(w / 2,  -h / 2);
-			} else {
-				vertices[0].Set(0,  0);
-				vertices[1].Set(0,  h);
-				vertices[2].Set(w, h);
-				vertices[3].Set(w,  0);
-			}
-
-			polygonShape.Set(vertices, 4);
-			fixture.shape = &polygonShape;
-
-			lua_pop(L, 2);
-		} else if (strcmp(shape, "circle") == 0) {
-			lua_getfield(L, 2, "h");
-			double r = check_number(L, -1, 1);
-
-			circleShape.m_radius = r;
-			circleShape.m_p.x = x;
-			circleShape.m_p.y = y;
-
-			if (!centered) {
-				circleShape.m_p.x += r;
-				circleShape.m_p.y += r;
-			}
-
-			fixture.shape = &circleShape;
-
-			lua_pop(L, 1);
-		} else {
-			std::cerr << "Wrong shape type!\n";
-			polygonShape.SetAsBox(1, 1);
-			fixture.shape = &polygonShape;
-		}
-	} else {
-		polygonShape.SetAsBox(1, 1);
-		fixture.shape = &polygonShape;
+		parse_fixture(L, body, 2, check_bool(L, 3, false));
 	}
-
-	body->CreateFixture(&fixture);
 
 	body_list.push_back(body);
 	lua_pushnumber(L, body_list.size() - 1);
-
-	fixture.isSensor = check_bool(L, 3, false);
 
 	return 1;
 }

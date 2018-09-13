@@ -40,4 +40,24 @@ function input:is_down(name)
 	end
 end
 
+function input:was_pressed(name)
+	if not name or not self.keys[name] then return false end
+
+	for _, v in pairs(self.keys[name]) do
+		if tsab.input.was_pressed(v) then
+			return true
+		end
+	end
+end
+
+function input:was_released(name)
+	if not name or not self.keys[name] then return false end
+
+	for _, v in pairs(self.keys[name]) do
+		if tsab.input.was_released(v) then
+			return true
+		end
+	end
+end
+
 return input

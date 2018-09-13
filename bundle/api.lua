@@ -270,6 +270,10 @@ function body:get_velocity()
 	return tsab_physics_get_body_velocity(self.pointer)
 end
 
+function body:add_fixture(...)
+	tsab_physics_add_fixture(self.pointer, ...)
+end
+
 tsab.physics.new_body = function(...)
 	return body(tsab_physics_new_body(...))
 end

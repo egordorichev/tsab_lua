@@ -1,4 +1,5 @@
 local state = object:extend()
+state.name = "state"
 
 function state:init()
 

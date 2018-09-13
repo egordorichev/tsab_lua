@@ -9,10 +9,14 @@ function player:init()
 
 	self.vel = point()
 	self.speed = 40
+	self.jump_speed = 40
+	self.w = 8
+	self.h = 8
+
 	self.body = tsab.physics.new_body("dynamic", {
 		shape = "rect",
-		w = 16,
-		h = 16
+		w = 8,
+		h = 8
 	})
 end
 
@@ -40,6 +44,10 @@ function player:update(dt)
 
 	if input:is_down("right") then
 		self.vel.x = self.vel.x + self.speed
+	end
+
+	if input:was_pressed("jump") then
+		self.vel.y = self.vel.y - self.jump_speed
 	end
 
 	local vdt = dt * 60 * 0.7

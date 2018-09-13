@@ -1,7 +1,9 @@
 local entity = require "l2.entity"
 local level = entity:extend()
+level.type_name = "level"
 
 function level:new(path, tile_image, tile_layer)
+	level.super.new(self, 0, 0)
 	local tile_layer = tile_layer
 
 	if not tile_layer then
@@ -35,8 +37,46 @@ function level:new(path, tile_image, tile_layer)
 	self:add_physics()
 end
 
-function level:add_physics()
+function level:is_solid(i)
+	return self.data[i] > 0
+end
 
+function level:add_physics()
+	self.body = tsab.physics.new_body("static")
+
+	local dirs = { -1, 1, -self.tw, self.tw, -1 - self.tw, -1 + self.tw, 1 - self.tw, 1 + self.tw }
+
+	for y = 0, self.th - 1 do
+		for x = 0, self.tw - 1 do
+			local i = x + y * self.tw + 1
+
+			if self:is_solid(i) then
+				local count = 0
+
+				for j = 1, 8 do
+					local k = i + dirs[j]
+
+					if k < 1 or k > self.sz or self:is_solid(k) then
+						count = count + 1
+					end
+				end
+
+				if count < 8 then
+					self.body:add_fixture({
+						shape = "rect",
+						x = x * self.t,
+						y = y * self.t,
+						w = self.t,
+						h = self.t
+					})
+				end
+			end
+		end
+	end
+end
+
+function level:destroy()
+	self.body:destroy()
 end
 
 function level:draw()

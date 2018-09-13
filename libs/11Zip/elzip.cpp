@@ -60,7 +60,7 @@ namespace elz
 		    std::string str = p.path().relative_path().generic_string().erase(0, len);
 		    char *pt = (char *) str.c_str();
 
-		    if (strstr(pt, ".zip") == NULL && strstr(pt, "..tsab") == NULL) {
+		    //if (strstr(pt, ".zip") == NULL && strstr(pt, "..tsab") == NULL) {
 			    std::ifstream file(p.path().relative_path().generic_string(), std::ios::in | std::ios::binary);
 
 			    if (file.is_open()) {
@@ -73,7 +73,7 @@ namespace elz
 			    }
 
 			    file.close();
-		    }
+		    //}
 	    }
     }
 

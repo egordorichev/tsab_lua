@@ -1,6 +1,7 @@
 local area = require "l2.area"
 local state = require "l2.state"
 local ingame = state:extend()
+ingame.name = "ingame"
 
 local player = require "player"
 local level = require "l2.level"
@@ -15,10 +16,10 @@ function ingame:init()
 
 	local plr = player()
 
-	plr.x = 64
-	plr.y = 64
-
 	self.area:add(plr)
+	plr:set(96, 64)
+
+	print("Loaded level")
 end
 
 function ingame:destroy()
