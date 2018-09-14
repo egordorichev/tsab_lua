@@ -78,6 +78,12 @@ function debug.draw_main()
 		tsab.ui.label("Entities", tostring(#game.state.area.entities))
 	end
 
+	game.speed = tsab.ui.slider_float("Speed", game.speed, 0, 2, 0.5)
+
+	if tsab.ui.button("Restart state") then
+		game.reset()
+	end
+
 	tsab.ui.finish()
 end
 

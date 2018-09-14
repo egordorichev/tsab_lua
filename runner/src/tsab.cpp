@@ -50,7 +50,7 @@ static int traceback(lua_State *L) {
 }
 
 bool running = true;
-int fps;
+int fps = 60;
 
 static int tsab_quit(lua_State *L) {
 	running = false;
@@ -127,6 +127,7 @@ int tsab_init(int arg, char **argv) {
 	int window_min_width = 0;
 	int window_min_height = 0;
 	bool resizeable;
+	bool vsync = true;
 	char *window_title;
 	int rv;
 
@@ -151,6 +152,16 @@ int tsab_init(int arg, char **argv) {
 			lua_pushstring(L, "width");
 			lua_gettable(L, -2);
 			window_width = check_number(L, -1, window_width);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "vsync");
+			lua_gettable(L, -2);
+			vsync = check_bool(L, -1, vsync);
+			lua_pop(L, 1);
+
+			lua_pushstring(L, "fps");
+			lua_gettable(L, -2);
+			fps = check_number(L, -1, fps);
 			lua_pop(L, 1);
 
 			lua_pushstring(L, "height");
@@ -192,6 +203,9 @@ int tsab_init(int arg, char **argv) {
 	}
 
 	tsab_graphics_init(window_width, window_height, window_min_width, window_min_height, window_title, flags);
+
+	SDL_GL_SetSwapInterval(0);
+
 	tsab_audio_init();
 	tsab_input_init();
 	tsab_ui_init();
@@ -256,18 +270,19 @@ int tsab_init(int arg, char **argv) {
 	return 0;
 }
 
-Uint64 timer_now = SDL_GetPerformanceCounter();
-Uint64 timer_last = 0;
 double timer_dt = 0;
-double timer_accumulator = 0;
 int frame;
 Uint32 start;
 int w;
 int h;
 SDL_Event event;
+double frame_delay;
 
 void tsab_loop() {
 	tsab_graphics_get_ready();
+
+	frame_delay = 1000.0 / fps;
+	timer_dt = frame_delay;
 
 	while (running) {
 		tsab_loop_step();
@@ -307,20 +322,13 @@ bool tsab_loop_step() {
 		}
 	}
 
-	// Handle updates
-	timer_accumulator += timer_dt;
+	// Call update
+	lua_pushcfunction(L, traceback);
+	lua_getglobal(L, "tsab_update");
+	lua_pushnumber(L, timer_dt * 0.001);
 
-	while (timer_accumulator >= timer_fixed_dt) {
-		// Call update
-		lua_pushcfunction(L, traceback);
-		lua_getglobal(L, "tsab_update");
-		lua_pushnumber(L, timer_fixed_dt);
-
-		if (lua_pcall(L, 1, 0, lua_gettop(L) - 2) != 0) {
-			report_lua_error(L);
-		}
-
-		timer_accumulator -= timer_fixed_dt;
+	if (lua_pcall(L, 1, 0, lua_gettop(L) - 2) != 0) {
+		report_lua_error(L);
 	}
 
 	tsab_graphics_clear_screen();
@@ -334,14 +342,16 @@ bool tsab_loop_step() {
 	}
 
 	tsab_graphics_flip(NULL);
-	SDL_Delay(1);
 
-	timer_last = timer_now;
-	timer_now = SDL_GetPerformanceCounter();
-	timer_dt = ((timer_now - timer_last) / (double) SDL_GetPerformanceFrequency());
+	// FPS handling
+	timer_dt = SDL_GetTicks() - start;
+
+	if (timer_dt < frame_delay) {
+		SDL_Delay(frame_delay - timer_dt);
+	}
 
 	if (frame % 40 == 0) {
-		fps = 1000.0 / ((double) (SDL_GetTicks() - start));
+		fps = 1000 / (SDL_GetTicks() - start);
 	}
 
 	frame ++;

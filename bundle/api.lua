@@ -274,6 +274,10 @@ function body:add_fixture(...)
 	tsab_physics_add_fixture(self.pointer, ...)
 end
 
+function body:apply_force(...)
+	tsab_physics_apply_force(self.pointer, ...)
+end
+
 tsab.physics.new_body = function(...)
 	return body(tsab_physics_new_body(...))
 end
@@ -302,3 +306,5 @@ tsab.ui.collapsing_header = tsab_ui_collapsing_header
 tsab.ui.same_line = tsab_ui_same_line
 tsab.ui.slider_float2 = tsab_ui_slider_float2
 tsab.ui.input_float2 = tsab_ui_input_float2
+tsab.ui.slider_float = tsab_ui_slider_float
+tsab.ui.input_float = tsab_ui_input_float

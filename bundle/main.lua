@@ -6,6 +6,8 @@ tick = require "lib.tick"
 lurker = require "lib.lurker"
 log = require "lib.log"
 
+local ENABLE_CANVAS = true
+
 -- requires
 game = require "l2.game" -- also global
 local ingame = require "ingame"
@@ -45,14 +47,18 @@ function tsab.update(dt)
 end
 
 function tsab.draw()
-	tsab.graphics.set_canvas(canvas)
-	tsab.graphics.clear()
+	if ENABLE_CANVAS then
+		tsab.graphics.set_canvas(canvas)
+		tsab.graphics.clear()
+	end
 
 	game.draw()
 
-	tsab.graphics.set_canvas()
-	tsab.graphics.color()
-	tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)
+	if ENABLE_CANVAS then
+		tsab.graphics.set_canvas()
+		tsab.graphics.color()
+		tsab.graphics.draw(canvas, canvas_x, canvas_y, 0, 0, 0, canvas_scale, canvas_scale)
+	end
 
 	debug.draw()
 end

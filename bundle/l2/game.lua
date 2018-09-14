@@ -1,7 +1,8 @@
 local game = {}
+game.speed = 1
 
 function game.set_state(state)
-	game.apply_state(state)
+	game.to_set = state
 end
 
 function game.apply_state(state)
@@ -16,8 +17,12 @@ function game.apply_state(state)
 	end
 end
 
+function game.reset()
+	game.set_state(game.state.__index())
+end
+
 function game.init(state)
-	game.set_state(state)
+	game.apply_state(state)
 end
 
 function game.destroy()
@@ -33,7 +38,7 @@ function game.update(dt)
 	end
 
 	if game.state then
-		game.state:update(dt)
+		game.state:update(dt * game.speed)
 	end
 end
 

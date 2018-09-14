@@ -10,13 +10,13 @@ function player:init()
 	self.vel = point()
 	self.speed = 40
 	self.jump_speed = 40
-	self.w = 8
-	self.h = 8
+	self.w = 16
+	self.h = 16
 
 	self.body = tsab.physics.new_body("dynamic", {
 		shape = "rect",
-		w = 8,
-		h = 8
+		w = self.w,
+		h = self.h
 	})
 end
 

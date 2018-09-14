@@ -23,6 +23,7 @@ void tsab_physics_register_api(lua_State *L) {
 	lua_register(L, "tsab_physics_set_body_velocity", tsab_physics_set_body_velocity);
 	lua_register(L, "tsab_physics_get_body_velocity", tsab_physics_get_body_velocity);
 	lua_register(L, "tsab_physics_add_fixture", tsab_physics_add_fixture);
+	lua_register(L, "tsab_physics_apply_force", tsab_physics_apply_force);
 }
 
 int tsab_physics_new_world(lua_State *L) {
@@ -31,7 +32,7 @@ int tsab_physics_new_world(lua_State *L) {
 		return 0;
 	}
 
-	world = new b2World(b2Vec2(check_number(L, 1, 0), check_number(L, 2, 40)));
+	world = new b2World(b2Vec2(check_number(L, 1, 0), check_number(L, 2, 0)));
 	world->SetAllowSleeping(check_bool(L, 3, true));
 	world->SetContinuousPhysics(check_bool(L, 3, true));
 	debug.SetFlags(b2Draw::e_shapeBit);
@@ -44,7 +45,7 @@ int tsab_physics_new_world(lua_State *L) {
 
 int tsab_physics_update(lua_State *L) {
 	if (world != nullptr) {
-		world->Step(timer_fixed_dt, check_number(L, 1, 8), check_number(L, 2, 3));
+		world->Step(check_number(L, 1, 0.01), check_number(L, 2, 8), check_number(L, 3, 3));
 	}
 
 	return 0;
@@ -111,8 +112,8 @@ void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
 
 		lua_pop(L, 2);
 	} else if (strcmp(shape, "circle") == 0) {
-		lua_getfield(L, 2, "h");
-		double r = check_number(L, -1, 1);
+		lua_getfield(L, 2, "r");
+		double r = check_number(L, -1, 8);
 		b2CircleShape circleShape;
 
 		circleShape.m_radius = r;
@@ -161,7 +162,7 @@ int tsab_physics_new_body(lua_State *L) {
 
 	b2BodyDef def;
 
-	const char *type = luaL_checkstring(L, 1);
+	const char *type = check_string(L, 1, "dynamic");
 
 	if (strcmp(type, "dynamic") == 0) {
 		def.type = b2_dynamicBody;
@@ -226,6 +227,17 @@ int tsab_physics_get_body_transform(lua_State *L) {
 		lua_pushnumber(L, body->GetAngle());
 
 		return 3;
+	}
+
+	return 0;
+}
+
+int tsab_physics_apply_force(lua_State *L) {
+	int id = luaL_checknumber(L, 1);
+
+	if (id > -1 && id < body_list.size()) {
+		b2Body *body = body_list[id];
+		body->ApplyForceToCenter(b2Vec2(luaL_checknumber(L, 2), luaL_checknumber(L, 3)), true);
 	}
 
 	return 0;
@@ -320,7 +332,7 @@ void DebugView::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 		GPU_SetUniformf(GPU_GetUniformLocation(tsab_shaders_get_active_shader(), "textured"), 0);
 	}
 
-	GPU_CircleFilled(tsab_graphics_get_current_target(), center.x, center.y, radius, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
+	GPU_Circle(tsab_graphics_get_current_target(), center.x, center.y, radius, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
 }
 
 void DebugView::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) {

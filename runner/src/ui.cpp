@@ -46,6 +46,8 @@ void tsab_ui_register_api(lua_State *L) {
 	lua_register(L, "tsab_ui_same_line", tsab_ui_same_line);
 	lua_register(L, "tsab_ui_slider_float2", tsab_ui_slider_float2);
 	lua_register(L, "tsab_ui_input_float2", tsab_ui_input_float2);
+	lua_register(L, "tsab_ui_slider_float", tsab_ui_slider_float);
+	lua_register(L, "tsab_ui_input_float", tsab_ui_input_float);
 }
 
 void tsab_ui_handle_event(SDL_Event *event) {
@@ -150,7 +152,7 @@ int tsab_ui_slider_float2(lua_State *L) {
 		static_cast<float>(luaL_checknumber(L, 3))
 	};
 
-	bool v = ImGui::SliderFloat2(luaL_checkstring(L, 1), values, check_number(L, 3, 0), check_number(L, 4, 10), "%.2f", check_number(L, 5, 1));
+	bool v = ImGui::SliderFloat2(luaL_checkstring(L, 1), values, check_number(L, 4, 0), check_number(L, 5, 10), "%.2f", check_number(L, 6, 1));
 
 	lua_pushnumber(L, values[0]);
 	lua_pushnumber(L, values[1]);
@@ -172,4 +174,30 @@ int tsab_ui_input_float2(lua_State *L) {
 	lua_pushboolean(L, v);
 
 	return 3;
+}
+
+int tsab_ui_slider_float(lua_State *L) {
+	float values[1] = {
+		static_cast<float>(luaL_checknumber(L, 2))
+	};
+
+	bool v = ImGui::SliderFloat(luaL_checkstring(L, 1), values, check_number(L, 3, 0), check_number(L, 4, 10), "%.2f", check_number(L, 5, 1));
+
+	lua_pushnumber(L, values[0]);
+	lua_pushboolean(L, v);
+
+	return 2;
+}
+
+int tsab_ui_input_float(lua_State *L) {
+	float values[1] = {
+		static_cast<float>(luaL_checknumber(L, 2))
+	};
+
+	bool v = ImGui::InputFloat(luaL_checkstring(L, 1), values);
+
+	lua_pushnumber(L, values[0]);
+	lua_pushboolean(L, v);
+
+	return 2;
 }

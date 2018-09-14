@@ -23,5 +23,7 @@ int tsab_ui_pop_node(lua_State *L);
 int tsab_ui_same_line(lua_State *L);
 int tsab_ui_slider_float2(lua_State *L);
 int tsab_ui_input_float2(lua_State *L);
+int tsab_ui_slider_float(lua_State *L);
+int tsab_ui_input_float(lua_State *L);
 
 #endif

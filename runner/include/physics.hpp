@@ -21,6 +21,7 @@ int tsab_physics_get_body_transform(lua_State *L);
 int tsab_physics_set_body_velocity(lua_State *L);
 int tsab_physics_get_body_velocity(lua_State *L);
 int tsab_physics_add_fixture(lua_State *L);
+int tsab_physics_apply_force(lua_State *L);
 
 class DebugView : public b2Draw
 {
