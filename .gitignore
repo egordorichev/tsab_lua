@@ -1,3 +1,8 @@
+tsab-util
+CMakeFiles*
+CMakeFiles/*
+content.tsab
+
 # Prerequisites
 *.d
 
