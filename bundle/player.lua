@@ -8,12 +8,13 @@ function player:init()
 	player.super.init(self)
 
 	self.vel = point()
-	self.speed = 40
-	self.jump_speed = 40
+	self.speed = 40 * 10
+	self.jump_speed = 40 * 10
 	self.w = 16
 	self.h = 16
 
 	self.body = tsab.physics.new_body("dynamic", {
+		-- todo: polygon shapes
 		shape = "rect",
 		w = self.w,
 		h = self.h

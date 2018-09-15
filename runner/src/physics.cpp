@@ -9,8 +9,12 @@
 b2World *world;
 std::vector<b2Body *> body_list;
 DebugView debug;
+double scale = 1;
+double anti_scale = 1 / scale;
 
 void tsab_physics_register_api(lua_State *L) {
+	lua_register(L, "tsab_physics_set_scale", tsab_physics_set_scale);
+	lua_register(L, "tsab_physics_get_scale", tsab_physics_get_scale);
 	lua_register(L, "tsab_physics_new_world", tsab_physics_new_world);
 	lua_register(L, "tsab_physics_update", tsab_physics_update);
 	lua_register(L, "tsab_physics_draw", tsab_physics_draw);
@@ -26,13 +30,24 @@ void tsab_physics_register_api(lua_State *L) {
 	lua_register(L, "tsab_physics_apply_force", tsab_physics_apply_force);
 }
 
+int tsab_physics_set_scale(lua_State *L) {
+	scale = check_number(L, 1, 1);
+	anti_scale = 1 / scale;
+	return 0;
+}
+
+int tsab_physics_get_scale(lua_State *L) {
+	lua_pushnumber(L, scale);
+	return 1;
+}
+
 int tsab_physics_new_world(lua_State *L) {
 	if (world != nullptr) {
 		std::cerr << "World is already created!\n";
 		return 0;
 	}
 
-	world = new b2World(b2Vec2(check_number(L, 1, 0), check_number(L, 2, 0)));
+	world = new b2World(b2Vec2(check_number(L, 1, 0) * anti_scale, check_number(L, 2, 0) * anti_scale));
 	world->SetAllowSleeping(check_bool(L, 3, true));
 	world->SetContinuousPhysics(check_bool(L, 3, true));
 	debug.SetFlags(b2Draw::e_shapeBit);
@@ -73,6 +88,7 @@ void no_world() {
 void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
 	b2FixtureDef fixture;
 	fixture.isSensor = sensor;
+	fixture.friction = 0;
 
 	lua_getfield(L, from, "shape");
 	lua_getfield(L, from, "x");
@@ -80,16 +96,16 @@ void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
 	lua_getfield(L, from, "centred");
 
 	const char *shape = check_string(L, -4, "rect");
-	double x = check_number(L, -3, 0);
-	double y = check_number(L, -2, 0);
+	double x = check_number(L, -3, 0) * anti_scale;
+	double y = check_number(L, -2, 0) * anti_scale;
 	bool centered = check_bool(L, -1, false);
 	lua_pop(L, 4);
 
 	if (strcmp(shape, "rect") == 0) {
 		lua_getfield(L, from, "w");
 		lua_getfield(L, from, "h");
-		double w = check_number(L, -2, 1);
-		double h = check_number(L, -1, 1);
+		double w = check_number(L, -2, 1) * anti_scale;
+		double h = check_number(L, -1, 1) * anti_scale;
 
 		b2Vec2 vertices[4];
 
@@ -104,6 +120,7 @@ void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
 			vertices[2].Set(x + w, y + h);
 			vertices[3].Set(x + w, y + 0);
 		}
+
 		b2PolygonShape polygonShape;
 
 		polygonShape.Set(vertices, 4);
@@ -113,7 +130,7 @@ void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
 		lua_pop(L, 2);
 	} else if (strcmp(shape, "circle") == 0) {
 		lua_getfield(L, 2, "r");
-		double r = check_number(L, -1, 8);
+		double r = check_number(L, -1, 8) * anti_scale;
 		b2CircleShape circleShape;
 
 		circleShape.m_radius = r;
@@ -133,7 +150,7 @@ void parse_fixture(lua_State *L, b2Body *body, int from, bool sensor) {
 		std::cerr << "Wrong shape type!\n";
 		b2PolygonShape polygonShape;
 
-		polygonShape.SetAsBox(1, 1);
+		polygonShape.SetAsBox(anti_scale, anti_scale);
 		fixture.shape = &polygonShape;
 
 		body->CreateFixture(&fixture);
@@ -210,7 +227,7 @@ int tsab_physics_set_body_transform(lua_State *L) {
 
 	if (id > -1 && id < body_list.size()) {
 		b2Body *body = body_list[id];
-		body->SetTransform(b2Vec2(luaL_checknumber(L, 2), luaL_checknumber(L, 3)), luaL_checknumber(L, 4));
+		body->SetTransform(b2Vec2(luaL_checknumber(L, 2) * anti_scale, luaL_checknumber(L, 3) * anti_scale), luaL_checknumber(L, 4));
 	}
 
 	return 0;
@@ -222,8 +239,8 @@ int tsab_physics_get_body_transform(lua_State *L) {
 	if (id > -1 && id < body_list.size()) {
 		b2Body *body = body_list[id];
 
-		lua_pushnumber(L, body->GetPosition().x);
-		lua_pushnumber(L, body->GetPosition().y);
+		lua_pushnumber(L, body->GetPosition().x * scale);
+		lua_pushnumber(L, body->GetPosition().y * scale);
 		lua_pushnumber(L, body->GetAngle());
 
 		return 3;
@@ -237,7 +254,7 @@ int tsab_physics_apply_force(lua_State *L) {
 
 	if (id > -1 && id < body_list.size()) {
 		b2Body *body = body_list[id];
-		body->ApplyForceToCenter(b2Vec2(luaL_checknumber(L, 2), luaL_checknumber(L, 3)), true);
+		body->ApplyForceToCenter(b2Vec2(luaL_checknumber(L, 2) * anti_scale, luaL_checknumber(L, 3) * anti_scale), true);
 	}
 
 	return 0;
@@ -248,7 +265,7 @@ int tsab_physics_set_body_velocity(lua_State *L) {
 
 	if (id > -1 && id < body_list.size()) {
 		b2Body *body = body_list[id];
-		body->SetLinearVelocity(b2Vec2(luaL_checknumber(L, 2), luaL_checknumber(L, 3)));
+		body->SetLinearVelocity(b2Vec2(luaL_checknumber(L, 2) * anti_scale, luaL_checknumber(L, 3) * anti_scale));
 	}
 
 	return 0;
@@ -260,8 +277,8 @@ int tsab_physics_get_body_velocity(lua_State *L) {
 	if (id > -1 && id < body_list.size()) {
 		b2Body *body = body_list[id];
 
-		lua_pushnumber(L, body->GetLinearVelocity().x);
-		lua_pushnumber(L, body->GetLinearVelocity().y);
+		lua_pushnumber(L, body->GetLinearVelocity().x * scale);
+		lua_pushnumber(L, body->GetLinearVelocity().y * scale);
 
 		return 2;
 	}
@@ -273,8 +290,8 @@ void DebugView::DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2C
 	float ver[vertexCount * 2];
 
 	for (int i = 0; i < vertexCount; i++) {
-		ver[i * 2] = vertices[i].x + 0.5;
-		ver[i * 2 + 1] = vertices[i].y + 0.5;
+		ver[i * 2] = floor(vertices[i].x * scale) + 0.5;
+		ver[i * 2 + 1] = floor(vertices[i].y * scale) + 0.5;
 	}
 
 	if (tsab_shaders_get_active() > -1) {
@@ -293,8 +310,8 @@ void DebugView::DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, cons
 	float ver[vertexCount * 2];
 
 	for (int i = 0; i < vertexCount; i++) {
-		ver[i * 2] = vertices[i].x + 0.5;
-		ver[i * 2 + 1] = vertices[i].y + 0.5;
+		ver[i * 2] = floor(vertices[i].x * scale) + 0.5;
+		ver[i * 2 + 1] = floor(vertices[i].y * scale) + 0.5;
 	}
 
 	if (tsab_shaders_get_active() > -1) {
@@ -319,7 +336,7 @@ void DebugView::DrawCircle(const b2Vec2& center, float32 radius, const b2Color& 
 		GPU_SetUniformf(GPU_GetUniformLocation(tsab_shaders_get_active_shader(), "textured"), 0);
 	}
 
-	GPU_Circle(tsab_graphics_get_current_target(), center.x, center.y, radius, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
+	GPU_Circle(tsab_graphics_get_current_target(), floor(center.x * scale) + 0.5, floor(center.y * scale) + 0.5, radius * scale, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
 }
 
 void DebugView::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) {
@@ -332,7 +349,7 @@ void DebugView::DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Ve
 		GPU_SetUniformf(GPU_GetUniformLocation(tsab_shaders_get_active_shader(), "textured"), 0);
 	}
 
-	GPU_Circle(tsab_graphics_get_current_target(), center.x, center.y, radius, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
+	GPU_Circle(tsab_graphics_get_current_target(), floor(center.x * scale) + 0.5, floor(center.y * scale) + 0.5, radius * scale, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
 }
 
 void DebugView::DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) {
@@ -344,5 +361,5 @@ void DebugView::DrawTransform(const b2Transform& xf) {
 }
 
 void DebugView::DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) {
-	GPU_Pixel(tsab_graphics_get_current_target(), p.x, p.y, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
+	GPU_Pixel(tsab_graphics_get_current_target(), floor(p.x * scale) + 0.5, floor(p.x * scale) + 0.5, { (Uint8) (color.r * 255), (Uint8) (color.g * 255), (Uint8) (color.b * 255), (Uint8) (color.a * 255) });
 }

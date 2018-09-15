@@ -7,7 +7,9 @@ local player = require "player"
 local level = require "l2.level"
 
 function ingame:init()
-	tsab.physics.new_world(0, 40)
+	tsab.physics.new_world(0, 500)
+	tsab.physics.set_scale(4)
+
 	self.area = area()
 
 	local lvl = level("data/map/test", "data/image/tiles.png")
@@ -20,14 +22,6 @@ function ingame:init()
 	plr:set(96, 64)
 
 	print("Loaded level")
-
-	tsab.physics.new_body("static", {
-		shape = "rect",
-		x = 0,
-		y = 110,
-		w = CANVAS_WIDTH,
-		h = 16
-	})
 end
 
 function ingame:destroy()

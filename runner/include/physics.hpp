@@ -10,6 +10,8 @@
 
 void tsab_physics_register_api(lua_State *L);
 
+int tsab_physics_set_scale(lua_State *L);
+int tsab_physics_get_scale(lua_State *L);
 int tsab_physics_new_world(lua_State *L);
 int tsab_physics_destroy_world(lua_State *L);
 int tsab_physics_update(lua_State *L);

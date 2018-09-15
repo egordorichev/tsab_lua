@@ -237,10 +237,15 @@ tsab.fs.get_last_modified = tsab_fs_get_last_modified
 --
 
 tsab.physics = {}
+local scale = 2
+local anti_scale = 2
+
 tsab.physics.new_world = tsab_physics_new_world
 tsab.physics.destroy_world = tsab_physics_destroy_world
 tsab.physics.update = tsab_physics_update
 tsab.physics.draw = tsab_physics_draw
+tsab.physics.set_scale = tsab_physics_set_scale
+tsab.physics.get_scale = tsab_physics_get_scale
 
 local object = require "lib.classic"
 local body = object:extend()
@@ -281,12 +286,6 @@ end
 tsab.physics.new_body = function(...)
 	return body(tsab_physics_new_body(...))
 end
-
-tsab.physics.destroy_body = tsab_physics_destroy_body
-tsab.physics.set_body_transform = tsab_physics_set_body_transform
-tsab.physics.get_body_transform = tsab_physics_get_body_transform
-tsab.physics.set_body_velocity = tsab_physics_set_body_velocity
-tsab.physics.get_body_velocity =  tsab_physics_get_body_velocity
 
 --
 -- ui

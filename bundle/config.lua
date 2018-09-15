@@ -8,7 +8,7 @@ DEBUG = true
 CANVAS_WIDTH = 640
 CANVAS_HEIGHT = 360
 PIXEL_PERFECT = true
-local default_scale = 1
+local default_scale = 2
 
 -- config
 config = {
